@@ -279,6 +279,26 @@ void ImpressionistUI::cb_sizeSlides(Fl_Widget* o, void* v)
 {
 	((ImpressionistUI*)(o->user_data()))->m_nSize=int( ((Fl_Slider *)o)->value() ) ;
 }
+//------------------------------
+//some new functions wothout implementation 
+//TODO:
+void ImpressionistUI::cb_colors(Fl_Widget* o, void* v) {};
+void ImpressionistUI::cb_paintly(Fl_Widget* o, void* v) {};
+void ImpressionistUI::cb_load_edge_image(Fl_Widget* o, void* v) {};
+void ImpressionistUI::cb_load_another_image(Fl_Widget* o, void* v) {};
+
+
+void ImpressionistUI::cb_original__image(Fl_Widget* o, void* v) {};
+void ImpressionistUI::cb_edge_image(Fl_Widget* o, void* v) {};
+void ImpressionistUI::cb_another_image(Fl_Widget* o, void* v) {};
+
+void ImpressionistUI::cb_faster(Fl_Widget* o, void* v) {};
+void ImpressionistUI::cb_safer(Fl_Widget* o, void* v) {};
+
+//------------------------------
+
+
+
 
 //---------------------------------- per instance functions --------------------------------------
 
@@ -339,6 +359,8 @@ void ImpressionistUI::setSize( int size )
 		m_BrushSizeSlider->value(m_nSize);
 }
 
+
+
 // Main menu definition
 Fl_Menu_Item ImpressionistUI::menuitems[] = {
 	{ "&File",		0, 0, 0, FL_SUBMENU },
@@ -346,10 +368,28 @@ Fl_Menu_Item ImpressionistUI::menuitems[] = {
 		{ "&Save Image...",	FL_ALT + 's', (Fl_Callback *)ImpressionistUI::cb_save_image },
 		{ "&Brushes...",	FL_ALT + 'b', (Fl_Callback *)ImpressionistUI::cb_brushes }, 
 		{ "&Clear Canvas", FL_ALT + 'c', (Fl_Callback *)ImpressionistUI::cb_clear_canvas, 0, FL_MENU_DIVIDER },
-		
+		//add some new button here 
+		{ "&Colors",	FL_ALT + 'k', (Fl_Callback *)ImpressionistUI::cb_colors },
+		{ "&Paintly",	FL_ALT + 'p', (Fl_Callback *)ImpressionistUI::cb_paintly, 0, FL_MENU_DIVIDER},
+
+		{ "Load Edge Image...",	FL_ALT + 'e', (Fl_Callback *)ImpressionistUI::cb_load_edge_image },
+		{ "Load Another Image...",	FL_ALT + 'a', (Fl_Callback *)ImpressionistUI::cb_load_another_image, 0, FL_MENU_DIVIDER },
+
+
 		{ "&Quit",			FL_ALT + 'q', (Fl_Callback *)ImpressionistUI::cb_exit },
 		{ 0 },
+	{ "&Display",		0, 0, 0, FL_SUBMENU },
+		{ "&Original Image",			FL_ALT + 'o', (Fl_Callback *)ImpressionistUI::cb_original__image },
+		{ "&Edge Image",			FL_ALT + 'e', (Fl_Callback *)ImpressionistUI::cb_edge_image },
+		{ "&Another Image...",	FL_ALT + 'a', (Fl_Callback *)ImpressionistUI::cb_another_image, 0, FL_MENU_DIVIDER },
+		{0},
 
+	{ "&Options",		0, 0, 0, FL_SUBMENU },
+		{ "&Faster",			FL_ALT + 'f', (Fl_Callback *)ImpressionistUI::cb_faster },
+		{ "&Safer",	FL_ALT + 's', (Fl_Callback *)ImpressionistUI::cb_safer, 0, FL_MENU_DIVIDER },
+		{0},
+
+		//end here
 	{ "&Help",		0, 0, 0, FL_SUBMENU },
 		{ "&About",	FL_ALT + 'a', (Fl_Callback *)ImpressionistUI::cb_about },
 		{ 0 },

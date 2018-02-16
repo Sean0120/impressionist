@@ -75,6 +75,19 @@ private:
 	static void	cb_brushChoice(Fl_Widget* o, void* v);
 	static void	cb_clear_canvas_button(Fl_Widget* o, void* v);
 	static void	cb_sizeSlides(Fl_Widget* o, void* v);
+	//add some new helper function here for "file" in menu bar
+	static void	cb_colors(Fl_Widget* o, void* v);
+	static void	cb_paintly(Fl_Widget* o, void* v);
+	static void	cb_load_edge_image(Fl_Widget* o, void* v);
+	static void	cb_load_another_image(Fl_Widget* o, void* v);
+	//add some new helper function here for "Display" in menu bar
+	static void	cb_original__image(Fl_Widget* o, void* v);
+	static void	cb_edge_image(Fl_Widget* o, void* v);
+	static void	cb_another_image(Fl_Widget* o, void* v);
+	//add spme new helper functopn here for "Options" in menu bar
+	static void	cb_faster(Fl_Widget* o, void* v);
+	static void	cb_safer(Fl_Widget* o, void* v);
+
 
 };
 
