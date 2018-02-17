@@ -427,7 +427,7 @@ Fl_Menu_Item ImpressionistUI::brushTypeMenu[NUM_BRUSH_TYPE+1] = {
 
 //stroke direction memu definition
 Fl_Menu_Item ImpressionistUI::strokeDirectionMenu[4] = {
-    //TODO
+    {0};//TODO
 }
 
 //----------------------------------------------------
