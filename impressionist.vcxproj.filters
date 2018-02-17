@@ -80,19 +80,19 @@
     <ClInclude Include="PointBrush.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="CircleBrush.hpp">
+    <ClInclude Include="CircleBrush.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="LineBrush.hpp">
+    <ClInclude Include="LineBrush.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="ScatteredCircleBrush.hpp">
+    <ClInclude Include="ScatteredPointBrush.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="ScatteredLineBrush.hpp">
+    <ClInclude Include="ScatteredLineBrush.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="ScatteredPointBrush.hpp">
+    <ClInclude Include="ScatteredCircleBrush.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
