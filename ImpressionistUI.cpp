@@ -253,9 +253,22 @@ void ImpressionistUI::cb_brushChoice(Fl_Widget* o, void* v)
 	ImpressionistDoc* pDoc=pUI->getDocument();
 
 	int type=(int)v;
-
+    
+    //  Activate the sliders and choice when it is line brush
+    if(type==BRUSH_LINES||type==BRUSH_SCATTERED_LINES)
+    {
+        pUI->m_lineWidthSlider->activate();
+        pUI->m_lineAngleSlider->activate();
+        pUI->m_StrokeDirectionChoice->activate();
+    }
 
 	pDoc->setBrushType(type);
+}
+
+//Set the stroke direction in the stroke direction choice
+void ImpressionistUI::cb_strokeDirectionChoice(Fl_Widget* o, void* v)
+{
+    //TODO
 }
 
 //------------------------------------------------------------
@@ -278,6 +291,18 @@ void ImpressionistUI::cb_clear_canvas_button(Fl_Widget* o, void* v)
 void ImpressionistUI::cb_sizeSlides(Fl_Widget* o, void* v)
 {
 	((ImpressionistUI*)(o->user_data()))->m_nSize=int( ((Fl_Slider *)o)->value() ) ;
+}
+
+//  Callback function for line width slider
+void ImpressionistUI::cb_lineWidthSlides(Fl_Widget* o, void* v)
+{
+    ((ImpressionistUI*)(o->user_data()))->m_lineWidth=int( ((Fl_Slider *)o)->value() ) ;
+}
+
+//  Callback function for line angle slider
+void ImpressionistUI::cb_lineAngleSlides(Fl_Widget* o, void* o)
+{
+    ((ImpressionistUI*)(o->user_data()))->m_lineAngle=int( ((Fl_Slider *)o)->value() ) ;
 }
 
 //---------------------------------- per instance functions --------------------------------------
@@ -339,6 +364,38 @@ void ImpressionistUI::setSize( int size )
 		m_BrushSizeSlider->value(m_nSize);
 }
 
+//  Return the line width
+int ImpressionistUI::getLineWidth()
+{
+    return m_lineWidth;
+}
+
+//  Set the line width
+void ImpressionistUI::setLineWidth( int lineWidth )
+{
+    m_lineWidth=lineWidth;
+    
+    if(lineWidth<=40)
+        m_lineWidthSlider->value(m_lineWidth);
+}
+
+//  Return the line angle
+int ImpressionistUI::getLineAngle()
+{
+    return m_lineAngle;
+}
+
+//  Set the line angle
+void ImpressionistUI::setLineAngle( int lineAngle )
+{
+    m_lineAngle=lineAngle;
+    
+    if(lineAngle<360)
+        m_lineWidthSlider->value(m_lineAngle);
+}
+
+
+
 // Main menu definition
 Fl_Menu_Item ImpressionistUI::menuitems[] = {
 	{ "&File",		0, 0, 0, FL_SUBMENU },
@@ -368,7 +425,10 @@ Fl_Menu_Item ImpressionistUI::brushTypeMenu[NUM_BRUSH_TYPE+1] = {
   {0}
 };
 
-
+//stroke direction memu definition
+Fl_Menu_Item ImpressionistUI::strokeDirectionMenu[4] = {
+    //TODO
+}
 
 //----------------------------------------------------
 // Constructor.  Creates all of the widgets.
@@ -402,6 +462,9 @@ ImpressionistUI::ImpressionistUI() {
 	// init values
 
 	m_nSize = 10;
+    
+    m_lineWidth=1;
+    m_lineAngle=0;  //init new attributes
 
 	// brush dialog definition
 	m_brushDialog = new Fl_Window(400, 325, "Brush Dialog");
@@ -410,6 +473,13 @@ ImpressionistUI::ImpressionistUI() {
 		m_BrushTypeChoice->user_data((void*)(this));	// record self to be used by static callback functions
 		m_BrushTypeChoice->menu(brushTypeMenu);
 		m_BrushTypeChoice->callback(cb_brushChoice);
+    
+        //Add the stroke direction choice to the dialog
+        m_StrokeDirectionChoice = new Fl_Choice(125, 40, 150, 25, "&Stroke Direction");
+        m_StrokeDirectionChoice->user_data((void*)(this));
+        m_StrokeDirectionChoice->menu(strokeDirectionMenu);
+        m_StrokeDirectionChoice->callback(cb_strokeDirectionChoice);
+        m_StrokeDirectionChoice->deactivate();
 
 		m_ClearCanvasButton = new Fl_Button(240,10,150,25,"&Clear Canvas");
 		m_ClearCanvasButton->user_data((void*)(this));
@@ -428,7 +498,35 @@ ImpressionistUI::ImpressionistUI() {
 		m_BrushSizeSlider->value(m_nSize);
 		m_BrushSizeSlider->align(FL_ALIGN_RIGHT);
 		m_BrushSizeSlider->callback(cb_sizeSlides);
-
+    
+        //Add line width slider to the dialog
+        m_lineWidthSlider = new Fl_Value_Slider(10, 105, 300, 20, "Line Width");
+        m_lineWidthSlider->user_data((void*)(this));
+        m_lineWidthSlider->type(FL_HOR_NICE_SLIDER);
+        m_lineWidthSlider->labelfont(FL_COURIER);
+        m_lineWidthSlider->labelsize(12);
+        m_lineWidthSlider->minimum(1);
+        m_lineWidthSlider->maximum(40);
+        m_lineWidthSlider->step(1);
+        m_lineWidthSlider->value(m_lineWidth);
+        m_lineWidthSlider->align(FL_ALIGN_RIGHT);
+        m_lineWidthSlider->callback(cb_lineWidthSlides);
+        m_lineWidthSlider->deactivate();
+    
+        //Add line angle slider to the dialog
+        m_lineAngleSlider = new Fl_Value_Slider(10, 130, 300, 20, "Line Angle");
+        m_lineAngleSlider->user_data((void*)(this));
+        m_lineAngleSlider->type(FL_HOR_NICE_SLIDER);
+        m_lineAngleSlider->labelfont(FL_COURIER);
+        m_lineAngleSlider->labelsize(12);
+        m_lineAngleSlider->minimum(0);
+        m_lineAngleSlider->maximum(359);
+        m_lineAngleSlider->step(1);
+        m_lineAngleSlider->value(m_lineAngle);
+        m_lineAngleSlider->align(FL_ALIGN_RIGHT);
+        m_lineAngleSlider->callback(cb_lineAngleSlides);
+        m_lineAngleSlider->deactivate();
+    
     m_brushDialog->end();	
 
 }
