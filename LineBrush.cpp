@@ -7,12 +7,12 @@
 
 #include "LineBrush.hpp"
 #include "impressionistDoc.h"
-#inlcude "impressionistUI.h"
+#include "impressionistUI.h"
 
 extern float frand();
 
 LineBrush::LineBrush( ImpressionistDoc* pDoc, char* name) :
-    Impbrush(pDoc, name)
+    ImpBrush(pDoc, name)
 {
 }
 
@@ -26,7 +26,7 @@ void LineBrush::BrushMove( const Point source, const Point target )
     //TODO
 }
 
-void LineBrush::BrushEnd( const Point source, const point target )
+void LineBrush::BrushEnd( const Point source, const Point target )
 {
     //TODO
 }

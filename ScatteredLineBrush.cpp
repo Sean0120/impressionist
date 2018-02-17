@@ -9,7 +9,7 @@
 #include "impressionistDoc.h"
 #include "impressionistUI.h"
 
-extern flaot frand();
+extern float frand();
 
 ScatteredLineBrush::ScatteredLineBrush( ImpressionistDoc* pDoc, char* name) :
     ImpBrush(pDoc, name)

@@ -6,8 +6,8 @@
 //
 
 #include "CircleBrush.hpp"
-#include "impressionistDoc.h"
-#include "imporessionistUI.h"
+#include "ImpressionistDoc.h"
+#include "ImpressionistUI.h"
 
 extern float frand();
 
