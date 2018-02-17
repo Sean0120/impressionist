@@ -8,7 +8,7 @@
 #ifndef ScatteredPointBrush_hpp
 #define ScatteredPointBrush_hpp
 
-#inclued "ImpBrush.h"
+#include "ImpBrush.h"
 
 class ScatteredPointBrush : public ImpBrush
 {
