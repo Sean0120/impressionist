@@ -29,6 +29,8 @@ public:
 	void	setSize(int size);				// set the UI size
 	char*	getImageName();					// get the current image name
 	
+    int     getLineWidth();//new: get the line width of line brush
+    int     getLineAngle();//get the line angle of line brush
 
 // Attributes
 public:
