@@ -39,7 +39,8 @@ public:
 
 	Fl_Slider*			m_BrushSizeSlider;
 	Fl_Button*          m_ClearCanvasButton;
-
+	Fl_Slider*			m_LineWidthSlider;
+	Fl_Slider*			m_LineAngleSlider;
 	// Member functions
 	void				setDocument(ImpressionistDoc* doc);
 	ImpressionistDoc*	getDocument();
@@ -52,11 +53,20 @@ public:
 	int					getSize();
 	void				setSize(int size);
 
+	//for line width 
+	int					getLineWidth();
+	void				setLineWidth(int width);
+
+	//for line angle
+	int					getLineAngle();
+	void				setLineAngle(int angle);
 private:
 	ImpressionistDoc*	m_pDoc;		// pointer to document to communicate with the document
 
 	// All attributes here
 	int		m_nSize;
+	int		m_nLineWidth;
+	int		m_nLineAngle;
 
 	// Static class members
 	static Fl_Menu_Item		menuitems[];
@@ -75,6 +85,8 @@ private:
 	static void	cb_brushChoice(Fl_Widget* o, void* v);
 	static void	cb_clear_canvas_button(Fl_Widget* o, void* v);
 	static void	cb_sizeSlides(Fl_Widget* o, void* v);
+	static void cb_lineWidthSlides(Fl_Widget * o, void * v);
+	static void cb_lineAngleSlides(Fl_Widget * o, void * v);
 	//add some new helper function here for "file" in menu bar
 	static void	cb_colors(Fl_Widget* o, void* v);
 	static void	cb_paintly(Fl_Widget* o, void* v);

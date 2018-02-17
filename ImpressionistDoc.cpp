@@ -87,6 +87,17 @@ int ImpressionistDoc::getSize()
 {
 	return m_pUI->getSize();
 }
+//  return the line width of the line brush
+int ImpressionistDoc::getLineWidth()
+{
+	return m_pUI->getLineWidth();
+}
+//  return the line angle of the line brush
+int ImpressionistDoc::getLineAngle()
+{
+	return m_pUI->getLineAngle();
+}
+
 
 //---------------------------------------------------------
 // Load the specified image

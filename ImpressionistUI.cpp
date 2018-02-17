@@ -253,7 +253,12 @@ void ImpressionistUI::cb_brushChoice(Fl_Widget* o, void* v)
 	ImpressionistDoc* pDoc=pUI->getDocument();
 
 	int type=(int)v;
-
+	//  Activate the sliders and choice when it is line brush
+	if (type == BRUSH_LINES || type == BRUSH_SCATTERED_LINES)
+	{
+		pUI->m_LineWidthSlider->activate();
+		pUI->m_LineAngleSlider->activate();
+	}
 
 	pDoc->setBrushType(type);
 }
@@ -279,6 +284,25 @@ void ImpressionistUI::cb_sizeSlides(Fl_Widget* o, void* v)
 {
 	((ImpressionistUI*)(o->user_data()))->m_nSize=int( ((Fl_Slider *)o)->value() ) ;
 }
+
+//-----------------------------------------------------------
+// Updates the line width to use from the value of the line width  slider
+// Called by the UI when the line width slider is moved
+//-----------------------------------------------------------
+void ImpressionistUI::cb_lineWidthSlides(Fl_Widget* o, void* v)
+{
+	((ImpressionistUI*)(o->user_data()))->m_nLineWidth = int(((Fl_Slider *)o)->value());
+}
+//-----------------------------------------------------------
+// Updates the line Angle to use from the value of the line Angle slider
+// Called by the UI when the line  Angle slider is moved
+//-----------------------------------------------------------
+void ImpressionistUI::cb_lineAngleSlides(Fl_Widget* o, void* v)
+{
+	((ImpressionistUI*)(o->user_data()))->m_nLineAngle = int(((Fl_Slider *)o)->value());
+}
+
+
 //------------------------------
 //some new functions wothout implementation 
 //TODO:
@@ -358,6 +382,44 @@ void ImpressionistUI::setSize( int size )
 	if (size<=40) 
 		m_BrushSizeSlider->value(m_nSize);
 }
+//------------------------------------------------
+// Return the line width
+//------------------------------------------------
+int ImpressionistUI::getLineWidth()
+{
+	return m_nLineWidth;
+}
+
+//-------------------------------------------------
+// Set the line width
+//-------------------------------------------------
+void ImpressionistUI::setLineWidth(int width)
+{
+	m_nLineWidth = width;
+
+	if (width <= 40)
+		m_LineWidthSlider->value(m_nLineWidth);
+}
+
+//------------------------------------------------
+// Return the line angle
+//------------------------------------------------
+int ImpressionistUI::getLineAngle()
+{
+	return m_nLineAngle;
+}
+
+//-------------------------------------------------
+// Set the line angle
+//-------------------------------------------------
+void ImpressionistUI::setLineAngle(int angle)
+{
+	m_nLineAngle = angle;
+
+	if (angle <= 359)
+		m_LineAngleSlider->value(m_nLineAngle);
+}
+
 
 
 
@@ -442,6 +504,8 @@ ImpressionistUI::ImpressionistUI() {
 	// init values
 
 	m_nSize = 10;
+	m_nLineWidth = 1;
+	m_nLineAngle = 0;
 
 	// brush dialog definition
 	m_brushDialog = new Fl_Window(400, 325, "Brush Dialog");
@@ -468,6 +532,34 @@ ImpressionistUI::ImpressionistUI() {
 		m_BrushSizeSlider->value(m_nSize);
 		m_BrushSizeSlider->align(FL_ALIGN_RIGHT);
 		m_BrushSizeSlider->callback(cb_sizeSlides);
+
+		// Add line width and angle slider to dialog
+		m_LineWidthSlider = new Fl_Value_Slider(10, 110, 300, 20, "Line Width");
+		m_LineWidthSlider->user_data((void*)(this));
+		m_LineWidthSlider->type(FL_HOR_NICE_SLIDER);
+		m_LineWidthSlider->labelfont(FL_COURIER);
+		m_LineWidthSlider->labelsize(12);
+		m_LineWidthSlider->minimum(1);
+		m_LineWidthSlider->maximum(40);
+		m_LineWidthSlider->step(1);
+		m_LineWidthSlider->value(m_nLineWidth);
+		m_LineWidthSlider->align(FL_ALIGN_RIGHT);
+		m_LineWidthSlider->callback(cb_lineWidthSlides);
+		m_LineWidthSlider->deactivate();
+
+		m_LineAngleSlider = new Fl_Value_Slider(10, 140, 300, 20, "Line Angle");
+		m_LineAngleSlider->user_data((void*)(this));
+		m_LineAngleSlider->type(FL_HOR_NICE_SLIDER);
+		m_LineAngleSlider->labelfont(FL_COURIER);
+		m_LineAngleSlider->labelsize(12);
+		m_LineAngleSlider->minimum(0);
+		m_LineAngleSlider->maximum(359);
+		m_LineAngleSlider->step(1);
+		m_LineAngleSlider->value(m_nLineAngle);
+		m_LineAngleSlider->align(FL_ALIGN_RIGHT);
+		m_LineAngleSlider->callback(cb_lineAngleSlides);
+		m_LineAngleSlider->deactivate();
+
 
     m_brushDialog->end();	
 
