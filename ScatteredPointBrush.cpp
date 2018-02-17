@@ -6,8 +6,8 @@
 //
 
 #include "ScatteredPointBrush.hpp"
-#inlcude "impressionistDoc.h"
-#inlcude "impressionistUI.h"
+#include "impressionistDoc.h"
+#include "impressionistUI.h"
 
 extern float frand();
 

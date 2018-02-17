@@ -7,7 +7,7 @@
 
 #include "LineBrush.hpp"
 #include "impressionistDoc.h"
-#inlcude "impressionistUI.h"
+#include "impressionistUI.h"
 
 extern float frand();
 
