@@ -64,6 +64,8 @@ public:
 	//for alpha 
 	float				getAlpha();
 	void				setAlpha(float alpha);
+	//for the marker in the original vew
+	void				setMarkerPoint(Point p);
 private:
 	ImpressionistDoc*	m_pDoc;		// pointer to document to communicate with the document
 

@@ -14,7 +14,7 @@
 #include <stdlib.h>
 
 class ImpressionistDoc;
-
+class ImpressionistUI;
 class PaintView : public Fl_Gl_Window
 {
 public:
@@ -30,8 +30,8 @@ public:
 
 	void RestoreContent();
 
-	ImpressionistDoc *m_pDoc;
-
+	ImpressionistDoc* m_pDoc;
+	ImpressionistUI *m_pUI;
 private:
 	GLvoid* m_pPaintBitstart;
 	int		m_nDrawWidth,

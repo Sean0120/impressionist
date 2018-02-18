@@ -9,7 +9,8 @@
 #include "ImpressionistUI.h"
 #include "paintview.h"
 #include "ImpBrush.h"
-
+#include <iostream>
+using namespace std;
 
 #define LEFT_MOUSE_DOWN		1
 #define LEFT_MOUSE_DRAG		2
@@ -148,6 +149,10 @@ void PaintView::draw()
 
 int PaintView::handle(int event)
 {
+	coord.x = Fl::event_x();
+	coord.y = Fl::event_y();
+	Point marker(coord.x + m_nStartCol, m_nEndRow - coord.y);
+
 	switch(event)
 	{
 	case FL_ENTER:
@@ -171,6 +176,10 @@ int PaintView::handle(int event)
 		else
 			eventToDo=LEFT_MOUSE_DRAG;
 		isAnEvent=1;
+		//set the maker here 
+		m_pUI->setMarkerPoint(marker);
+		
+		
 		redraw();
 		break;
 	case FL_RELEASE:
@@ -186,6 +195,8 @@ int PaintView::handle(int event)
 	case FL_MOVE:
 		coord.x = Fl::event_x();
 		coord.y = Fl::event_y();
+		//set the marker here 
+		m_pUI->setMarkerPoint(marker);
 		break;
 	default:
 		return 0;

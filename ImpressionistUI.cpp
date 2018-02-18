@@ -449,7 +449,9 @@ void ImpressionistUI::setAlpha(float alpha)
 		m_AlphaSlider->value(m_nAlpha);
 }
 
-
+void ImpressionistUI::setMarkerPoint(Point p) {
+	m_origView->setMarkerPoint(p);
+}
 
 // Main menu definition
 Fl_Menu_Item ImpressionistUI::menuitems[] = {
@@ -519,6 +521,7 @@ ImpressionistUI::ImpressionistUI() {
 			// install paint view window
 			m_paintView = new PaintView(300, 25, 300, 275, "This is the paint view");//0jon
 			m_paintView->box(FL_DOWN_FRAME);
+			m_paintView->m_pUI = this; // store the UI pointer in the paint to build a bridge between the original view and paint view
 
 			// install original view window
 			m_origView = new OriginalView(0, 25, 300, 275, "This is the orig view");//300jon
