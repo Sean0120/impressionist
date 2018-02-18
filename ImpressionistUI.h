@@ -95,6 +95,8 @@ private:
 	static void cb_lineAngleSlides(Fl_Widget * o, void * v);
 	static void cb_alphaSlides(Fl_Widget * o, void * v);
 	//add some new helper function here for "file" in menu bar
+	// the prototype may be wrong
+	static void cb_switch_view(Fl_Menu_ * o, void * v);
 	static void	cb_colors(Fl_Widget* o, void* v);
 	static void	cb_paintly(Fl_Widget* o, void* v);
 	static void	cb_load_edge_image(Fl_Widget* o, void* v);

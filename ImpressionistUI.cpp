@@ -230,7 +230,16 @@ void ImpressionistUI::cb_exit(Fl_Menu_* o, void* v)
 
 }
 
-
+//function for switching the view 
+void ImpressionistUI::cb_switch_view(Fl_Menu_* o, void* v) {
+	ImpressionistDoc* pDoc = whoami(o)->getDocument();
+	unsigned char* temp = pDoc->m_ucBitmap;
+	pDoc->m_ucBitmap = pDoc->m_ucPainting;
+	pDoc->m_ucPainting = temp;
+	//do not forge to refresh, otherwise the view will refresh only the cursor move in the painting
+	whoami(o)->m_origView->refresh();
+	whoami(o)->m_paintView->refresh();
+};
 
 //-----------------------------------------------------------
 // Brings up an about dialog box
@@ -310,6 +319,7 @@ void ImpressionistUI::cb_alphaSlides(Fl_Widget* o, void* v)
 {
 	((ImpressionistUI*)(o->user_data()))->m_nAlpha = float(((Fl_Slider *)o)->value());
 }
+
 
 //------------------------------
 //some new functions wothout implementation 
@@ -471,6 +481,7 @@ Fl_Menu_Item ImpressionistUI::menuitems[] = {
 		{ "&Quit",			FL_ALT + 'q', (Fl_Callback *)ImpressionistUI::cb_exit },
 		{ 0 },
 	{ "&Display",		0, 0, 0, FL_SUBMENU },
+		{ "&Switch views",			FL_ALT + 's', (Fl_Callback *)ImpressionistUI::cb_switch_view },
 		{ "&Original Image",			FL_ALT + 'o', (Fl_Callback *)ImpressionistUI::cb_original__image },
 		{ "&Edge Image",			FL_ALT + 'e', (Fl_Callback *)ImpressionistUI::cb_edge_image },
 		{ "&Another Image...",	FL_ALT + 'a', (Fl_Callback *)ImpressionistUI::cb_another_image, 0, FL_MENU_DIVIDER },
