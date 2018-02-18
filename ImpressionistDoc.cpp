@@ -97,7 +97,10 @@ int ImpressionistDoc::getLineAngle()
 {
 	return m_pUI->getLineAngle();
 }
-
+//return the alpha
+float ImpressionistDoc::getAlpha() {
+	return m_pUI->getAlpha();
+}
 
 //---------------------------------------------------------
 // Load the specified image

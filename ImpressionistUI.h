@@ -41,6 +41,7 @@ public:
 	Fl_Button*          m_ClearCanvasButton;
 	Fl_Slider*			m_LineWidthSlider;
 	Fl_Slider*			m_LineAngleSlider;
+	Fl_Slider*			m_AlphaSlider;
 	// Member functions
 	void				setDocument(ImpressionistDoc* doc);
 	ImpressionistDoc*	getDocument();
@@ -60,6 +61,9 @@ public:
 	//for line angle
 	int					getLineAngle();
 	void				setLineAngle(int angle);
+	//for alpha 
+	float				getAlpha();
+	void				setAlpha(float alpha);
 private:
 	ImpressionistDoc*	m_pDoc;		// pointer to document to communicate with the document
 
@@ -67,7 +71,7 @@ private:
 	int		m_nSize;
 	int		m_nLineWidth;
 	int		m_nLineAngle;
-
+	float   m_nAlpha;
 	// Static class members
 	static Fl_Menu_Item		menuitems[];
 	static Fl_Menu_Item		brushTypeMenu[NUM_BRUSH_TYPE+1];
@@ -87,6 +91,7 @@ private:
 	static void	cb_sizeSlides(Fl_Widget* o, void* v);
 	static void cb_lineWidthSlides(Fl_Widget * o, void * v);
 	static void cb_lineAngleSlides(Fl_Widget * o, void * v);
+	static void cb_alphaSlides(Fl_Widget * o, void * v);
 	//add some new helper function here for "file" in menu bar
 	static void	cb_colors(Fl_Widget* o, void* v);
 	static void	cb_paintly(Fl_Widget* o, void* v);

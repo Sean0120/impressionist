@@ -8,7 +8,7 @@
 #include <FL/fl_ask.h>
 
 #include <math.h>
-
+#include<iostream>
 #include "impressionistUI.h"
 #include "impressionistDoc.h"
 //test
@@ -302,6 +302,14 @@ void ImpressionistUI::cb_lineAngleSlides(Fl_Widget* o, void* v)
 	((ImpressionistUI*)(o->user_data()))->m_nLineAngle = int(((Fl_Slider *)o)->value());
 }
 
+//-----------------------------------------------------------
+// Updates the Alpha to use from the value of the Alpha slider
+// Called by the UI when the Alpha slider is moved
+//-----------------------------------------------------------
+void ImpressionistUI::cb_alphaSlides(Fl_Widget* o, void* v)
+{
+	((ImpressionistUI*)(o->user_data()))->m_nAlpha = float(((Fl_Slider *)o)->value());
+}
 
 //------------------------------
 //some new functions wothout implementation 
@@ -420,6 +428,26 @@ void ImpressionistUI::setLineAngle(int angle)
 		m_LineAngleSlider->value(m_nLineAngle);
 }
 
+//------------------------------------------------
+// Return the line angle
+//------------------------------------------------
+float ImpressionistUI::getAlpha()
+{
+
+	
+	return m_nAlpha;
+}
+
+//-------------------------------------------------
+// Set the line angle
+//-------------------------------------------------
+void ImpressionistUI::setAlpha(float alpha)
+{
+	m_nAlpha = alpha;
+
+	if (alpha <= 1.00)
+		m_AlphaSlider->value(m_nAlpha);
+}
 
 
 
@@ -506,7 +534,7 @@ ImpressionistUI::ImpressionistUI() {
 	m_nSize = 10;
 	m_nLineWidth = 1;
 	m_nLineAngle = 0;
-
+	m_nAlpha = 1.00;
 	// brush dialog definition
 	m_brushDialog = new Fl_Window(400, 325, "Brush Dialog");
 		// Add a brush type choice to the dialog
@@ -559,7 +587,19 @@ ImpressionistUI::ImpressionistUI() {
 		m_LineAngleSlider->align(FL_ALIGN_RIGHT);
 		m_LineAngleSlider->callback(cb_lineAngleSlides);
 		m_LineAngleSlider->deactivate();
-
+		
+		//add one slider for alpha
+		m_AlphaSlider = new Fl_Value_Slider(10, 170, 300, 20, "Alpha");
+		m_AlphaSlider->user_data((void*)(this));
+		m_AlphaSlider->type(FL_HOR_NICE_SLIDER);
+		m_AlphaSlider->labelfont(FL_COURIER);
+		m_AlphaSlider->labelsize(12);
+		m_AlphaSlider->minimum(0.00);
+		m_AlphaSlider->maximum(1.00);
+		m_AlphaSlider->step(0.01);
+		m_AlphaSlider->value(m_nAlpha);
+		m_AlphaSlider->align(FL_ALIGN_RIGHT);
+		m_AlphaSlider->callback(cb_alphaSlides);
 
     m_brushDialog->end();	
 

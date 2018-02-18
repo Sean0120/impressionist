@@ -29,7 +29,7 @@ public:
 	void	setSize(int size);				// set the UI size£¬i have no idea about the aim
 	int     getLineWidth();					//new: get the line width of line brush
 	int     getLineAngle();					//get the line angle of line brush
-
+	float   getAlpha();						//get the alpha
 	char*	getImageName();					// get the current image name
 	
 

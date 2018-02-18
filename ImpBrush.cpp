@@ -3,11 +3,11 @@
 //
 // The implementation of virtual brush. All the other brushes inherit from it.
 //
-
+#include<iostream>
 #include "impressionistDoc.h"
 #include "impressionistUI.h"
 #include "ImpBrush.h"
-
+using namespace std;
 // Static class member initializations
 int			ImpBrush::c_nBrushCount	= 0;
 ImpBrush**	ImpBrush::c_pBrushes	= NULL;
@@ -46,9 +46,11 @@ void ImpBrush::SetColor (const Point source)
 
 
 	GLubyte color[3];
-
+	float alpha = pDoc->getAlpha();
+	int new_alpha =  alpha* 255;
 	memcpy ( color, pDoc->GetOriginalPixel( source ), 3 );
- 
-	glColor3ubv( color );
+
+	glColor4ub(color[0],color[1],color[2],new_alpha);
+	
 
 }
