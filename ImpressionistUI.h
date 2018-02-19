@@ -15,6 +15,7 @@
 #include <FL/Fl_Choice.H>
 #include <FL/Fl_Button.H>
 #include <FL/Fl_Light_Button.H>
+#include <FL\Fl_Color_Chooser.H>
 
 #include "Impressionist.h"
 #include "OriginalView.h"
@@ -42,6 +43,11 @@ public:
 	Fl_Slider*			m_LineWidthSlider;
 	Fl_Slider*			m_LineAngleSlider;
 	Fl_Slider*			m_AlphaSlider;
+
+	//for color selection dialog
+	Fl_Window*			m_colorSelectionDialog;
+	Fl_Color_Chooser*   m_colorChooser;
+
 	// Member functions
 	void				setDocument(ImpressionistDoc* doc);
 	ImpressionistDoc*	getDocument();
@@ -66,6 +72,9 @@ public:
 	void				setAlpha(float alpha);
 	//for the marker in the original vew
 	void				setMarkerPoint(Point p);
+	//for color selection 
+	float*				getColor();
+	void				setColor(float r, float g, float b);
 private:
 	ImpressionistDoc*	m_pDoc;		// pointer to document to communicate with the document
 
@@ -74,6 +83,7 @@ private:
 	int		m_nLineWidth;
 	int		m_nLineAngle;
 	float   m_nAlpha;
+	float   m_ncolors[3];
 	// Static class members
 	static Fl_Menu_Item		menuitems[];
 	static Fl_Menu_Item		brushTypeMenu[NUM_BRUSH_TYPE+1];
@@ -96,12 +106,13 @@ private:
 	static void cb_alphaSlides(Fl_Widget * o, void * v);
 	//add some new helper function here for "file" in menu bar
 	// the prototype may be wrong
-	static void cb_switch_view(Fl_Menu_ * o, void * v);
-	static void	cb_colors(Fl_Widget* o, void* v);
+	static void	cb_colors(Fl_Menu_* o, void* v);
+	static void	cb_color_selection(Fl_Widget* o, void* v);
 	static void	cb_paintly(Fl_Widget* o, void* v);
 	static void	cb_load_edge_image(Fl_Widget* o, void* v);
 	static void	cb_load_another_image(Fl_Widget* o, void* v);
 	//add some new helper function here for "Display" in menu bar
+	static void cb_switch_view(Fl_Menu_ * o, void * v);
 	static void	cb_original__image(Fl_Widget* o, void* v);
 	static void	cb_edge_image(Fl_Widget* o, void* v);
 	static void	cb_another_image(Fl_Widget* o, void* v);
