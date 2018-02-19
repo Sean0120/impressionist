@@ -111,3 +111,10 @@ void OriginalView::drawMarkerPoint() {
 	glVertex2d(markerPoint.x , markerPoint.y + 5);
 	glEnd();
 }
+/*
+int OriginalView::getWinHeight() {
+	return m_nWindowHeight;
+}
+int OriginalView::getWinWidth() {
+	return m_nWindowWidth;
+}*/
