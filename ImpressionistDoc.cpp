@@ -98,6 +98,11 @@ int ImpressionistDoc::getLineAngle()
 	return m_pUI->getLineAngle();
 }
 
+//get the stroke direction
+int ImpressionistDoc::getStrokeDirection()
+{
+    return m_pUI->getStrokeDirection();
+}
 
 //---------------------------------------------------------
 // Load the specified image
@@ -213,4 +218,24 @@ GLubyte* ImpressionistDoc::GetOriginalPixel( const Point p )
 {
 	return GetOriginalPixel( p.x, p.y );
 }
+
+//Helper function to compute the gradient
+int ImpressionistDoc::getGx(const Point p)
+{
+    return (*(GetOriginalPixel(p.x+1, p.y-1))-*(GetOriginalPixel(p.x-1, p.y-1)))+
+                (*(GetOriginalPixel(p.x+1, p.y+1))-*(GetOriginalPixel(p.x-1, p.y+1)))+
+                    2*(*(GetOriginalPixel(p.x+1, p.y))-*(GetOriginalPixel(p.x-1, p.y)));
+}
+
+int ImpressionistDoc::getGy(const Point p)
+{
+    return (*(GetOriginalPixel(p.x+1, p.y-1))-*(GetOriginalPixel(p.x+1, p.y+1)))+
+                (*(GetOriginalPixel(p.x-1, p.y-1))-*(GetOriginalPixel(p.x-1, p.y+1)))+
+                    2*(*(GetOriginalPixel(p.x, p.y-1))-*(GetOriginalPixel(p.x, p.y+1)));
+}
+
+
+
+
+
 

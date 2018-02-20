@@ -41,6 +41,7 @@ public:
 	Fl_Button*          m_ClearCanvasButton;
 	Fl_Slider*			m_LineWidthSlider;
 	Fl_Slider*			m_LineAngleSlider;
+    Fl_Choice*          m_StrokeDirectionChoice;    //new choice
 	// Member functions
 	void				setDocument(ImpressionistDoc* doc);
 	ImpressionistDoc*	getDocument();
@@ -60,6 +61,11 @@ public:
 	//for line angle
 	int					getLineAngle();
 	void				setLineAngle(int angle);
+    
+    //for stroke direction
+    int                 getStrokeDirection();
+    void                setStrokeDirection(int direction);
+    
 private:
 	ImpressionistDoc*	m_pDoc;		// pointer to document to communicate with the document
 
@@ -67,10 +73,12 @@ private:
 	int		m_nSize;
 	int		m_nLineWidth;
 	int		m_nLineAngle;
-
+    int     m_StrokeDirection;  //type of direction
+    
 	// Static class members
 	static Fl_Menu_Item		menuitems[];
 	static Fl_Menu_Item		brushTypeMenu[NUM_BRUSH_TYPE+1];
+    static Fl_Menu_Item     strokeDirectionMenu[3+1]; //menu items of stroke direction choice
 
 	static ImpressionistUI*	whoami(Fl_Menu_* o);
 
@@ -87,6 +95,8 @@ private:
 	static void	cb_sizeSlides(Fl_Widget* o, void* v);
 	static void cb_lineWidthSlides(Fl_Widget * o, void * v);
 	static void cb_lineAngleSlides(Fl_Widget * o, void * v);
+    static void cb_strokeDirectionChoice(Fl_Widget* o, void* v);//new callback for new choice
+
 	//add some new helper function here for "file" in menu bar
 	static void	cb_colors(Fl_Widget* o, void* v);
 	static void	cb_paintly(Fl_Widget* o, void* v);

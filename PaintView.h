@@ -13,7 +13,10 @@
 #include <GL/glu.h>
 #include <stdlib.h>
 
+#include "ImpBrush.h"
+
 class ImpressionistDoc;
+class ImpressionistUI;  //To link ui and paint view
 
 class PaintView : public Fl_Gl_Window
 {
@@ -31,6 +34,11 @@ public:
 	void RestoreContent();
 
 	ImpressionistDoc *m_pDoc;
+    
+    ImpressionistUI *m_pUI;     //to link ui and paint view
+    
+    Point rightMouseStart, rightMouseEnd;	//for right mouse use
+	Point leftMouseStart, leftMouseEnd;
 
 private:
 	GLvoid* m_pPaintBitstart;

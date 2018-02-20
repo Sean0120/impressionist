@@ -29,7 +29,7 @@ public:
 	void	setSize(int size);				// set the UI size£¬i have no idea about the aim
 	int     getLineWidth();					//new: get the line width of line brush
 	int     getLineAngle();					//get the line angle of line brush
-
+    int     getStrokeDirection();           //get the stroke direction
 	char*	getImageName();					// get the current image name
 	
 
@@ -60,6 +60,9 @@ public:
 	// Get the color of the original picture at the specified point	
 	GLubyte* GetOriginalPixel( const Point p );  
 
+    // Helper function to compute the gradient
+    int getGx (const Point p);
+	int getGy(const Point p);
 
 private:
 	char			m_imageName[256];

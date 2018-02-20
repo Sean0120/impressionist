@@ -9,6 +9,7 @@
 #include "ImpressionistUI.h"
 #include "paintview.h"
 #include "ImpBrush.h"
+#include <math.h>
 
 
 #define LEFT_MOUSE_DOWN		1
@@ -28,12 +29,12 @@ static int		eventToDo;
 static int		isAnEvent=0;
 static Point	coord;
 
-PaintView::PaintView(int			x, 
-					 int			y, 
-					 int			w, 
-					 int			h, 
-					 const char*	l)
-						: Fl_Gl_Window(x,y,w,h,l)
+PaintView::PaintView(int			x,
+	int			y,
+	int			w,
+	int			h,
+	const char*	l)
+				: Fl_Gl_Window(x, y, w, h, l), rightMouseStart(), rightMouseEnd(), leftMouseStart(), leftMouseEnd()
 {
 	m_nWindowWidth	= w;
 	m_nWindowHeight	= h;
@@ -105,9 +106,49 @@ void PaintView::draw()
 		switch (eventToDo) 
 		{
 		case LEFT_MOUSE_DOWN:
+			if (m_pDoc->getStrokeDirection() == BRUSH_DIRECTION) {
+
+				leftMouseStart = target;
+				break;
+			}
 			m_pDoc->m_pCurrentBrush->BrushBegin( source, target );
 			break;
 		case LEFT_MOUSE_DRAG:
+			if (m_pDoc->getStrokeDirection() == BRUSH_DIRECTION) {
+				leftMouseEnd = target;
+				int angle;
+				double xDiff = leftMouseEnd.x - leftMouseStart.x;
+				double yDiff = leftMouseEnd.y - leftMouseStart.y;
+				if (xDiff == 0) {
+					if (yDiff == 0)
+						break;
+					else if (yDiff>0)
+						angle = 90;
+					else
+						angle = 270;
+				}
+				else {
+					double arcAngle = atan(yDiff / xDiff);
+					const double Pi = 3.1415926536;
+					angle = arcAngle / Pi * 180;
+					if (xDiff>0) {
+						if (yDiff == 0)
+							angle = 0;
+						else if (yDiff<0)
+							angle = 360 + angle;
+					}
+					else if (xDiff<0) {
+						angle = angle + 180;
+					}
+				}
+				m_pUI->setLineAngle(angle);
+
+				m_pDoc->m_pCurrentBrush->BrushMove(source, target);
+
+				leftMouseStart = target;
+
+				break;
+			}
 			m_pDoc->m_pCurrentBrush->BrushMove( source, target );
 			break;
 		case LEFT_MOUSE_UP:
@@ -117,13 +158,59 @@ void PaintView::draw()
 			RestoreContent();
 			break;
 		case RIGHT_MOUSE_DOWN:
+                if(m_pDoc->getStrokeDirection()==SLIDER){
+					SaveCurrentContent();
+
+                    rightMouseStart=target;
+                }   //set the origin of right mouse
 
 			break;
 		case RIGHT_MOUSE_DRAG:
+                if(m_pDoc->getStrokeDirection()==SLIDER){
+					RestoreContent();
+
+					rightMouseEnd = target;
+                    
+                    glBegin(GL_LINES);
+                    
+                    glColor3f(1, 0, 0);
+                    glVertex2d(rightMouseStart.x, rightMouseStart.y);
+                    glVertex2d(rightMouseEnd.x, rightMouseEnd.y);
+                    glEnd();
+                }   //draw a red line from rightMouseStart to rightMouseEnd and set the line angle in UI
 
 			break;
 		case RIGHT_MOUSE_UP:
-
+			if (m_pDoc->getStrokeDirection() == SLIDER) {
+				rightMouseEnd = target;
+				int angle;
+				double xDiff = rightMouseEnd.x - rightMouseStart.x;
+				double yDiff = rightMouseEnd.y - rightMouseStart.y;
+				if (xDiff == 0) {
+					if (yDiff == 0)
+						break;
+					else if (yDiff>0)
+						angle = 90;
+					else
+						angle = 270;
+				}
+				else {
+					double arcAngle = atan(yDiff / xDiff);
+					const double Pi = 3.1415926536;
+					angle = arcAngle / Pi * 180;
+					if (xDiff>0) {
+						if (yDiff == 0)
+							angle = 0;
+						else if (yDiff<0)
+							angle = 360 + angle;
+					}
+					else if (xDiff<0) {
+						angle = angle + 180;
+					}
+				}
+				m_pUI->setLineAngle(angle);
+				RestoreContent();
+			}
 			break;
 
 		default:
