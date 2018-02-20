@@ -11,6 +11,8 @@
 #include<iostream>
 #include "impressionistUI.h"
 #include "impressionistDoc.h"
+#include <iostream>
+using namespace std;
 //test
 /*
 //------------------------------ Widget Examples -------------------------------------------------
@@ -244,6 +246,15 @@ void ImpressionistUI::cb_switch_view(Fl_Menu_* o, void* v) {
 	whoami(o)->m_origView->refresh();
 	whoami(o)->m_paintView->refresh();
 };
+//the function for undoing painting
+void ImpressionistUI::cb_undo_painting(Fl_Menu_* o, void* v) {
+	ImpressionistDoc* pDoc = whoami(o)->getDocument();
+	unsigned char* temp = pDoc->m_ucUndoPainting;
+	pDoc->m_ucUndoPainting = pDoc->m_ucPainting;
+	pDoc->m_ucPainting = temp;
+	whoami(o)->m_paintView->refresh();
+	
+}
 
 //-----------------------------------------------------------
 // Brings up an about dialog box
@@ -498,6 +509,7 @@ Fl_Menu_Item ImpressionistUI::menuitems[] = {
 		{ "&Quit",			FL_ALT + 'q', (Fl_Callback *)ImpressionistUI::cb_exit },
 		{ 0 },
 	{ "&Display",		0, 0, 0, FL_SUBMENU },
+		{ "&Undo",			FL_ALT + 'd', (Fl_Callback *)ImpressionistUI::cb_undo_painting },
 		{ "&Switch views",			FL_ALT + 's', (Fl_Callback *)ImpressionistUI::cb_switch_view },
 		{ "&Original Image",			FL_ALT + 'o', (Fl_Callback *)ImpressionistUI::cb_original__image },
 		{ "&Edge Image",			FL_ALT + 'e', (Fl_Callback *)ImpressionistUI::cb_edge_image },

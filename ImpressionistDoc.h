@@ -44,7 +44,8 @@ public:
 	// Bitmaps for original image and painting.
 	unsigned char*	m_ucBitmap;
 	unsigned char*	m_ucPainting;
-
+	//Bitmaps for undo paiting
+	unsigned char*  m_ucUndoPainting;
 
 	// The current active brush.
 	ImpBrush*			m_pCurrentBrush;	

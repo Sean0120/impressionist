@@ -112,6 +112,7 @@ private:
 	static void	cb_load_edge_image(Fl_Widget* o, void* v);
 	static void	cb_load_another_image(Fl_Widget* o, void* v);
 	//add some new helper function here for "Display" in menu bar
+	static void cb_undo_painting(Fl_Menu_* o, void* v);
 	static void cb_switch_view(Fl_Menu_ * o, void * v);
 	static void	cb_original__image(Fl_Widget* o, void* v);
 	static void	cb_edge_image(Fl_Widget* o, void* v);

@@ -31,6 +31,7 @@ ImpressionistDoc::ImpressionistDoc()
 	m_nWidth		= -1;
 	m_ucBitmap		= NULL;
 	m_ucPainting	= NULL;
+	m_ucUndoPainting = NULL;
 
 
 	// create one instance of each brush
@@ -136,6 +137,7 @@ int ImpressionistDoc::loadImage(char *iname)
 	// release old storage
 	if ( m_ucBitmap ) delete [] m_ucBitmap;
 	if ( m_ucPainting ) delete [] m_ucPainting;
+	if (m_ucUndoPainting) delete[] m_ucUndoPainting;
 
 	m_ucBitmap		= data;
 
@@ -181,7 +183,7 @@ int ImpressionistDoc::saveImage(char *iname)
 //-----------------------------------------------------------------
 int ImpressionistDoc::clearCanvas() 
 {
-
+	if (m_ucUndoPainting) delete[] m_ucUndoPainting;
 	// Release old storage
 	if ( m_ucPainting ) 
 	{

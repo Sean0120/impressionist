@@ -110,6 +110,7 @@ void PaintView::draw()
 		switch (eventToDo) 
 		{
 		case LEFT_MOUSE_DOWN:
+			SaveUndoPainting();
 			m_pDoc->m_pCurrentBrush->BrushBegin( source, target );
 			break;
 		case LEFT_MOUSE_DRAG:
@@ -254,4 +255,12 @@ void PaintView::RestoreContent()
 				  m_pPaintBitstart);
 
 //	glDrawBuffer(GL_FRONT);
+}
+
+void PaintView::SaveUndoPainting() {
+	delete[] m_pDoc->m_ucUndoPainting;
+	int buffer_size = m_pDoc->m_nPaintWidth*m_pDoc->m_nPaintHeight * 3;
+	m_pDoc->m_ucUndoPainting = new unsigned char[buffer_size];
+	memcpy(m_pDoc->m_ucUndoPainting, m_pDoc->m_ucPainting,buffer_size);
+	
 }
