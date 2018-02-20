@@ -205,6 +205,56 @@ int ImpressionistDoc::clearCanvas()
 	return 0;
 }
 
+//load another image
+int ImpressionistDoc::loadAnotherImage(char *iname)
+{
+	// try to open the image to read
+	unsigned char*	data;
+	int				width,
+		height;
+
+	if ((data = readBMP(iname, width, height)) == NULL)
+	{
+		fl_alert("Can't load bitmap file");
+		return 0;
+	}
+
+	// reflect the fact of loading the new image
+	if (m_nWidth != width || m_nPaintWidth != width || m_nHeight != height) {
+		fl_alert("Dimension is different from the previous one");
+		return 0;
+	}
+	
+
+	// release old storage
+	
+	if (m_ucPainting) delete[] m_ucPainting;
+	
+	for (int i = 0; i < width*height * 3; i++) {
+		m_ucBitmap[i] = (m_ucBitmap[i] + data[i]) / 2;
+	}
+
+	// allocate space for draw view
+	m_ucPainting = new unsigned char[width*height * 3];
+	memset(m_ucPainting, 0, width*height * 3);
+
+	m_pUI->m_mainWindow->resize(m_pUI->m_mainWindow->x(),
+		m_pUI->m_mainWindow->y(),
+		width * 2,
+		height + 25);
+
+	// display it on origView
+	m_pUI->m_origView->resizeWindow(width, height);
+	m_pUI->m_origView->refresh();
+
+	// refresh paint view as well
+	m_pUI->m_paintView->resizeWindow(width, height);
+	m_pUI->m_paintView->refresh();
+
+
+	return 1;
+}
+
 //------------------------------------------------------------------
 // Get the color of the pixel in the original image at coord x and y
 //------------------------------------------------------------------

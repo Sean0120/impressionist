@@ -103,10 +103,13 @@ private:
 	static void	cb_save_image(Fl_Menu_* o, void* v);
 	static void	cb_brushes(Fl_Menu_* o, void* v);
 	static void	cb_clear_canvas(Fl_Menu_* o, void* v);
+	static void	cb_load_another_image(Fl_Menu_* o, void* v);
+
 	static void	cb_exit(Fl_Menu_* o, void* v);
 	static void	cb_about(Fl_Menu_* o, void* v);
 	static void	cb_brushChoice(Fl_Widget* o, void* v);
 	static void	cb_clear_canvas_button(Fl_Widget* o, void* v);
+
 	static void	cb_sizeSlides(Fl_Widget* o, void* v);
 	static void cb_lineWidthSlides(Fl_Widget * o, void * v);
 	static void cb_lineAngleSlides(Fl_Widget * o, void * v);
@@ -118,7 +121,6 @@ private:
 	static void	cb_color_selection(Fl_Widget* o, void* v);
 	static void	cb_paintly(Fl_Widget* o, void* v);
 	static void	cb_load_edge_image(Fl_Widget* o, void* v);
-	static void	cb_load_another_image(Fl_Widget* o, void* v);
 	//add some new helper function here for "Display" in menu bar
 	static void cb_undo_painting(Fl_Menu_* o, void* v);
 	static void cb_switch_view(Fl_Menu_ * o, void * v);

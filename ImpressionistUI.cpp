@@ -224,7 +224,16 @@ void ImpressionistUI::cb_colors(Fl_Menu_* o, void* v)
 {
 	whoami(o)->m_colorSelectionDialog->show();
 }
+//load another image
+void ImpressionistUI::cb_load_another_image(Fl_Menu_* o, void* v)
+{
+	ImpressionistDoc *pDoc = whoami(o)->getDocument();
 
+	char* newfile = fl_file_chooser("Open File?", "*.bmp", pDoc->getImageName());
+	if (newfile != NULL) {
+		pDoc->loadAnotherImage(newfile);
+	}
+}
 //------------------------------------------------------------
 // Causes the Impressionist program to exit
 // Called by the UI when the quit menu item is chosen
@@ -360,7 +369,6 @@ void ImpressionistUI::cb_color_selection(Fl_Widget* o, void* v) {
 
 void ImpressionistUI::cb_paintly(Fl_Widget* o, void* v) {};
 void ImpressionistUI::cb_load_edge_image(Fl_Widget* o, void* v) {};
-void ImpressionistUI::cb_load_another_image(Fl_Widget* o, void* v) {};
 
 
 void ImpressionistUI::cb_original__image(Fl_Widget* o, void* v) {};

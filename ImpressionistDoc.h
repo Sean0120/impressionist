@@ -24,6 +24,7 @@ public:
 
 
 	int     clearCanvas();                  // called by the UI to clear the drawing canvas
+	int     loadAnotherImage(char* iname);
 	void	setBrushType(int type);			// called by the UI to set the brushType
 	int		getSize();						// get the UI size
 	void	setSize(int size);				// set the UI size£¬i have no idea about the aim
