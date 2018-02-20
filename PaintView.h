@@ -12,7 +12,7 @@
 #include <FL/gl.h>
 #include <GL/glu.h>
 #include <stdlib.h>
-
+#include "ImpBrush.h"
 class ImpressionistDoc;
 class ImpressionistUI;
 class PaintView : public Fl_Gl_Window
@@ -32,6 +32,12 @@ public:
 
 	ImpressionistDoc* m_pDoc;
 	ImpressionistUI *m_pUI;
+
+	
+
+	Point rightMouseStart, rightMouseEnd;	//for right mouse use
+	Point leftMouseStart, leftMouseEnd;
+
 private:
 	GLvoid* m_pPaintBitstart;
 	int		m_nDrawWidth,

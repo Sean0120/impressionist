@@ -31,7 +31,8 @@ public:
 	int     getLineAngle();					//get the line angle of line brush
 	float   getAlpha();						//get the alpha
 	char*	getImageName();					// get the current image name
-	
+	int     getStrokeDirection();           //get the stroke direction
+
 
 // Attributes
 public:
@@ -60,6 +61,9 @@ public:
 	GLubyte* GetOriginalPixel( int x, int y );   
 	// Get the color of the original picture at the specified point	
 	GLubyte* GetOriginalPixel( const Point p );  
+	// Helper function to compute the gradient
+	int getGx(const Point p);
+	int getGy(const Point p);
 
 
 private:

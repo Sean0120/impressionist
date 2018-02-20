@@ -22,7 +22,13 @@ enum
 	BRUSH_SHARPENING,
 	NUM_BRUSH_TYPE // Make sure this stays at the end!
 };
-
+//  stroke direction control
+enum
+{
+	SLIDER = 0,
+	GRADIENT,
+	BRUSH_DIRECTION
+};
 
 class ImpressionistDoc; // Pre-declaring class
 

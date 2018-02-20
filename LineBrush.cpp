@@ -41,10 +41,20 @@ void LineBrush::BrushMove( const Point source, const Point target )
 	glLineWidth(width);
 	glBegin(GL_LINES);
 	SetColor(source);
-	//to rotate the line, change here, use a theta 
-	glVertex2d(target.x - size/2 * cos( 2 * Pi*angle/360 ), target.y - size / 2* sin(2 * Pi*angle / 360));
-	glVertex2d(target.x + size / 2 * cos(2 * Pi*angle / 360), target.y + size / 2 * sin(2 * Pi*angle / 360)) ;
-	
+	if (pDoc->getStrokeDirection() == SLIDER || pDoc->getStrokeDirection() == BRUSH_DIRECTION) {
+		//to rotate the line, change here, use a theta 
+		glVertex2d(target.x - size / 2 * cos(2 * Pi*angle / 360), target.y - size / 2 * sin(2 * Pi*angle / 360));
+		glVertex2d(target.x + size / 2 * cos(2 * Pi*angle / 360), target.y + size / 2 * sin(2 * Pi*angle / 360));
+
+	}
+	else if (pDoc->getStrokeDirection() == GRADIENT) {
+		int Gx = pDoc->getGx(source);
+		int Gy = pDoc->getGy(source);
+		double cosAngle = Gx / sqrt(Gx*Gx + Gy*Gy);
+		double sinAngle = Gy / sqrt(Gx*Gx + Gy*Gy);
+		glVertex2d(target.x - size / 2 * cosAngle, target.y - size / 2 * sinAngle);
+		glVertex2d(target.x + size / 2 * cosAngle, target.y + size / 2 * sinAngle);
+	}
 	glEnd();
 }
 

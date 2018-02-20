@@ -282,6 +282,12 @@ void ImpressionistUI::cb_brushChoice(Fl_Widget* o, void* v)
 	{
 		pUI->m_LineWidthSlider->activate();
 		pUI->m_LineAngleSlider->activate();
+		pUI->m_StrokeDirectionChoice->activate();
+	}
+	else {
+		pUI->m_LineWidthSlider->deactivate();
+		pUI->m_LineAngleSlider->deactivate();
+		pUI->m_StrokeDirectionChoice->deactivate();
 	}
 
 	pDoc->setBrushType(type);
@@ -323,7 +329,14 @@ void ImpressionistUI::cb_lineWidthSlides(Fl_Widget* o, void* v)
 //-----------------------------------------------------------
 void ImpressionistUI::cb_lineAngleSlides(Fl_Widget* o, void* v)
 {
-	((ImpressionistUI*)(o->user_data()))->m_nLineAngle = int(((Fl_Slider *)o)->value());
+	if (((ImpressionistUI*)(o->user_data()))->m_StrokeDirection == SLIDER)
+		((ImpressionistUI*)(o->user_data()))->m_nLineAngle = int(((Fl_Slider *)o)->value());
+}
+
+//Callback function for stroke direction choice
+void ImpressionistUI::cb_strokeDirectionChoice(Fl_Widget* o, void* v)
+{
+	((ImpressionistUI*)(o->user_data()))->m_StrokeDirection = int(((Fl_Choice *)o)->value());
 }
 
 //-----------------------------------------------------------
@@ -439,6 +452,8 @@ void ImpressionistUI::setLineWidth(int width)
 		m_LineWidthSlider->value(m_nLineWidth);
 }
 
+
+
 //------------------------------------------------
 // Return the line angle
 //------------------------------------------------
@@ -454,10 +469,22 @@ void ImpressionistUI::setLineAngle(int angle)
 {
 	m_nLineAngle = angle;
 
-	if (angle <= 359)
-		m_LineAngleSlider->value(m_nLineAngle);
+	if (m_StrokeDirection == SLIDER)
+		if (angle <= 359)
+			m_LineAngleSlider->value(m_nLineAngle);
 }
 
+//Get the type of stroke direction
+int ImpressionistUI::getStrokeDirection()
+{
+	return m_StrokeDirection;
+}
+
+//Set the type of stroke direction
+void ImpressionistUI::setStrokeDirection(int direction)
+{
+	m_StrokeDirection = direction;
+}
 //------------------------------------------------
 // Return the line angle
 //------------------------------------------------
@@ -544,6 +571,14 @@ Fl_Menu_Item ImpressionistUI::brushTypeMenu[NUM_BRUSH_TYPE+1] = {
 };
 
 
+//  Stroke direction choice menu definition
+Fl_Menu_Item ImpressionistUI::strokeDirectionMenu[3 + 1] = {
+	{ "Slider/Right Mouse", FL_ALT + 's', (Fl_Callback *)ImpressionistUI::cb_strokeDirectionChoice, (void *)SLIDER },
+	{ "Gradient", FL_ALT + 'g', (Fl_Callback *)ImpressionistUI::cb_strokeDirectionChoice, (void *)GRADIENT },
+	{ "Brush Direction", FL_ALT + 'b', (Fl_Callback *)ImpressionistUI::cb_strokeDirectionChoice, (void *)BRUSH_DIRECTION },
+	{ 0 }
+};
+
 
 //----------------------------------------------------
 // Constructor.  Creates all of the widgets.
@@ -565,7 +600,7 @@ ImpressionistUI::ImpressionistUI() {
 			m_paintView = new PaintView(300, 25, 300, 275, "This is the paint view");//0jon
 			m_paintView->box(FL_DOWN_FRAME);
 			m_paintView->m_pUI = this; // store the UI pointer in the paint to build a bridge between the original view and paint view
-
+			
 			// install original view window
 			m_origView = new OriginalView(0, 25, 300, 275, "This is the orig view");//300jon
 			m_origView->box(FL_DOWN_FRAME);
@@ -584,6 +619,7 @@ ImpressionistUI::ImpressionistUI() {
 	m_ncolors[0] = 1.0;
 	m_ncolors[1] = 1.0;
 	m_ncolors[2] = 1.0;
+	m_StrokeDirection = SLIDER;
 	// brush dialog definition
 	m_brushDialog = new Fl_Window(400, 325, "Brush Dialog");
 		// Add a brush type choice to the dialog
@@ -591,6 +627,13 @@ ImpressionistUI::ImpressionistUI() {
 		m_BrushTypeChoice->user_data((void*)(this));	// record self to be used by static callback functions
 		m_BrushTypeChoice->menu(brushTypeMenu);
 		m_BrushTypeChoice->callback(cb_brushChoice);
+
+		//Add the stroke direction choice to the dialog
+		m_StrokeDirectionChoice = new Fl_Choice(125, 45, 150, 25, "&Stroke Direction");
+		m_StrokeDirectionChoice->user_data((void*)(this));
+		m_StrokeDirectionChoice->menu(strokeDirectionMenu);
+		m_StrokeDirectionChoice->callback(cb_strokeDirectionChoice);
+		m_StrokeDirectionChoice->deactivate();
 
 		m_ClearCanvasButton = new Fl_Button(240,10,150,25,"&Clear Canvas");
 		m_ClearCanvasButton->user_data((void*)(this));

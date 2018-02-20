@@ -43,7 +43,7 @@ public:
 	Fl_Slider*			m_LineWidthSlider;
 	Fl_Slider*			m_LineAngleSlider;
 	Fl_Slider*			m_AlphaSlider;
-
+	Fl_Choice*          m_StrokeDirectionChoice;    //new choice
 	//for color selection dialog
 	Fl_Window*			m_colorSelectionDialog;
 	Fl_Color_Chooser*   m_colorChooser;
@@ -75,6 +75,11 @@ public:
 	//for color selection 
 	float*				getColor();
 	void				setColor(float r, float g, float b);
+
+	//for stroke direction
+	int                 getStrokeDirection();
+	void                setStrokeDirection(int direction);
+
 private:
 	ImpressionistDoc*	m_pDoc;		// pointer to document to communicate with the document
 
@@ -84,9 +89,11 @@ private:
 	int		m_nLineAngle;
 	float   m_nAlpha;
 	float   m_ncolors[3];
+	int     m_StrokeDirection;  //type of direction
 	// Static class members
 	static Fl_Menu_Item		menuitems[];
 	static Fl_Menu_Item		brushTypeMenu[NUM_BRUSH_TYPE+1];
+	static Fl_Menu_Item     strokeDirectionMenu[3 + 1]; //menu items of stroke direction choice
 
 	static ImpressionistUI*	whoami(Fl_Menu_* o);
 
@@ -104,6 +111,7 @@ private:
 	static void cb_lineWidthSlides(Fl_Widget * o, void * v);
 	static void cb_lineAngleSlides(Fl_Widget * o, void * v);
 	static void cb_alphaSlides(Fl_Widget * o, void * v);
+	static void cb_strokeDirectionChoice(Fl_Widget* o, void* v);//new callback for new choice
 	//add some new helper function here for "file" in menu bar
 	// the prototype may be wrong
 	static void	cb_colors(Fl_Menu_* o, void* v);
