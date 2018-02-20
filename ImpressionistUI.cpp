@@ -234,6 +234,16 @@ void ImpressionistUI::cb_load_another_image(Fl_Menu_* o, void* v)
 		pDoc->loadAnotherImage(newfile);
 	}
 }
+//set new mural image
+void ImpressionistUI::cb_set_mural_image(Fl_Menu_* o, void* v)
+{
+	ImpressionistDoc *pDoc = whoami(o)->getDocument();
+
+	char* newfile = fl_file_chooser("Open File?", "*.bmp", pDoc->getImageName());
+	if (newfile != NULL) {
+		pDoc->setMuralImage(newfile);
+	}
+}
 //------------------------------------------------------------
 // Causes the Impressionist program to exit
 // Called by the UI when the quit menu item is chosen
@@ -537,6 +547,7 @@ Fl_Menu_Item ImpressionistUI::menuitems[] = {
 		{ "&Colors",	FL_ALT + 'k', (Fl_Callback *)ImpressionistUI::cb_colors },
 		{ "&Paintly",	FL_ALT + 'p', (Fl_Callback *)ImpressionistUI::cb_paintly, 0, FL_MENU_DIVIDER},
 
+		{ "Set Mural Image",	FL_ALT + 'm', (Fl_Callback *)ImpressionistUI::cb_set_mural_image },
 		{ "Load Edge Image...",	FL_ALT + 'e', (Fl_Callback *)ImpressionistUI::cb_load_edge_image },
 		{ "Load Another Image...",	FL_ALT + 'a', (Fl_Callback *)ImpressionistUI::cb_load_another_image, 0, FL_MENU_DIVIDER },
 

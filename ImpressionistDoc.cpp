@@ -233,7 +233,7 @@ int ImpressionistDoc::loadAnotherImage(char *iname)
 	for (int i = 0; i < width*height * 3; i++) {
 		m_ucBitmap[i] = (m_ucBitmap[i] + data[i]) / 2;
 	}
-
+	delete [] data;
 	// allocate space for draw view
 	m_ucPainting = new unsigned char[width*height * 3];
 	memset(m_ucPainting, 0, width*height * 3);
@@ -253,6 +253,38 @@ int ImpressionistDoc::loadAnotherImage(char *iname)
 
 
 	return 1;
+}
+//the function for New Mural Image
+int ImpressionistDoc::setMuralImage(char* iname) {
+	// try to open the image to read
+	unsigned char*	data;
+	int				width,
+		height;
+
+	if ((data = readBMP(iname, width, height)) == NULL)
+	{
+		fl_alert("Can't load bitmap file");
+		return 0;
+	}
+
+	// reflect the fact of loading the new image
+	if (m_nWidth != width || m_nPaintWidth != width || m_nHeight != height) {
+		fl_alert("Dimension is different from the previous one");
+		return 0;
+	}
+
+
+	// release old storage
+
+	if (m_ucBitmap) delete[] m_ucBitmap;
+	m_ucBitmap =  data;
+
+	// display it on origView
+	m_pUI->m_origView->resizeWindow(width, height);
+	m_pUI->m_origView->refresh();
+
+
+
 }
 
 //------------------------------------------------------------------
