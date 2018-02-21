@@ -351,7 +351,7 @@ void PaintView::RestoreContent()
 }
 
 void PaintView::SaveUndoPainting() {
-	delete[] m_pDoc->m_ucUndoPainting;
+	if(m_pDoc->m_ucUndoPainting) delete[] m_pDoc->m_ucUndoPainting;
 	int buffer_size = m_pDoc->m_nPaintWidth*m_pDoc->m_nPaintHeight * 3;
 	m_pDoc->m_ucUndoPainting = new unsigned char[buffer_size];
 	memcpy(m_pDoc->m_ucUndoPainting, m_pDoc->m_ucPainting,buffer_size);

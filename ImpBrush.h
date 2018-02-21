@@ -20,6 +20,7 @@ enum
 	BRUSH_SCATTERED_CIRCLES,
 	BRUSH_BLUR,
 	BRUSH_SHARPENING,
+	BRUSH_WARP,
 	NUM_BRUSH_TYPE // Make sure this stays at the end!
 };
 //  stroke direction control

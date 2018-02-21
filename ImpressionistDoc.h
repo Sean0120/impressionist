@@ -62,6 +62,9 @@ public:
 	GLubyte* GetOriginalPixel( int x, int y );   
 	// Get the color of the original picture at the specified point	
 	GLubyte* GetOriginalPixel( const Point p );  
+	void SetPaintPixel(int x, int y, const GLubyte* color);
+	GLubyte* GetOriginalPixelBlack(const Point p);// if the point is out of the image, set the color to black
+
 	// Helper function to compute the gradient
 	int getGx(const Point p);
 	int getGy(const Point p);

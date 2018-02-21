@@ -21,8 +21,10 @@
 #include "ScatteredCircleBrush.h"
 #include "BlurBrush.h"
 #include "SharpeningBrush.h"
+#include "WarpBrush.h"
 #define DESTROY(p)	{  if ((p)!=NULL) {delete [] p; p=NULL; } }
 
+GLubyte* BLACKCOLOR = new GLubyte[3] ;
 ImpressionistDoc::ImpressionistDoc() 
 {
 	// Set NULL image name as init. 
@@ -33,7 +35,7 @@ ImpressionistDoc::ImpressionistDoc()
 	m_ucPainting	= NULL;
 	m_ucUndoPainting = NULL;
 
-
+	memset(BLACKCOLOR, 0, 3);
 	// create one instance of each brush
 	ImpBrush::c_nBrushCount	= NUM_BRUSH_TYPE;
 	ImpBrush::c_pBrushes	= new ImpBrush* [ImpBrush::c_nBrushCount];
@@ -57,6 +59,9 @@ ImpressionistDoc::ImpressionistDoc()
 	//the new brush :: sharpening
 	ImpBrush::c_pBrushes[BRUSH_SHARPENING]
 		= new SharpeningBrush(this, "Sharpening");
+	//warp brush
+	ImpBrush::c_pBrushes[BRUSH_WARP]
+		= new WarpBrush(this, "warp");
 	// make one of the brushes current
 	m_pCurrentBrush	= ImpBrush::c_pBrushes[0];
 
@@ -188,7 +193,14 @@ int ImpressionistDoc::saveImage(char *iname)
 //-----------------------------------------------------------------
 int ImpressionistDoc::clearCanvas() 
 {
-	if (m_ucUndoPainting) delete[] m_ucUndoPainting;
+	if (m_ucUndoPainting)
+	{
+		delete[] m_ucUndoPainting;
+		m_ucUndoPainting = new unsigned char[m_nPaintWidth*m_nPaintHeight * 3];
+		memset(m_ucUndoPainting, 0, m_nPaintWidth*m_nPaintHeight * 3);
+
+
+	}
 	// Release old storage
 	if ( m_ucPainting ) 
 	{
@@ -311,6 +323,23 @@ GLubyte* ImpressionistDoc::GetOriginalPixel( int x, int y )
 GLubyte* ImpressionistDoc::GetOriginalPixel( const Point p )
 {
 	return GetOriginalPixel( p.x, p.y );
+}
+
+//get the color of the pixel in the image, if it is out of the image, set it to black
+GLubyte* ImpressionistDoc::GetOriginalPixelBlack(const Point p) {
+	if (p.x < m_nWidth || p.y < m_nHeight || p.x > 0 || p.y > 0)
+		return (GLubyte*)(m_ucPainting + 3 * (p.y*m_nWidth + p.x));
+	else
+	{
+		return BLACKCOLOR;
+	}
+}
+//set the color of the pixel in the paint image
+void ImpressionistDoc::SetPaintPixel(int x, int y, const GLubyte* color)
+{
+	//directly ignore outbound situations
+	if (x < m_nWidth && y < m_nHeight && x > 0 && y > 0)
+		memcpy(m_ucPainting + 3 * (y * m_nWidth + x), color, 3);
 }
 
 //Helper function to compute the gradient
