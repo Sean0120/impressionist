@@ -24,13 +24,16 @@ public:
 
 
 	int     clearCanvas();                  // called by the UI to clear the drawing canvas
+	int     loadAnotherImage(char* iname);	//dissolve two image
 	void	setBrushType(int type);			// called by the UI to set the brushType
 	int		getSize();						// get the UI size
-	void	setSize(int size);				// set the UI size
+	void	setSize(int size);				// set the UI size£¬i have no idea about the aim
+	int     getLineWidth();					//new: get the line width of line brush
+	int     getLineAngle();					//get the line angle of line brush
+	float   getAlpha();						//get the alpha
 	char*	getImageName();					// get the current image name
-	
-    int     getLineWidth();//new: get the line width of line brush
-    int     getLineAngle();//get the line angle of line brush
+	int     getStrokeDirection();           //get the stroke direction
+	int		setMuralImage(char* iname);		//the function for New Mural Image
 
 // Attributes
 public:
@@ -43,7 +46,8 @@ public:
 	// Bitmaps for original image and painting.
 	unsigned char*	m_ucBitmap;
 	unsigned char*	m_ucPainting;
-
+	//Bitmaps for undo paiting
+	unsigned char*  m_ucUndoPainting;
 
 	// The current active brush.
 	ImpBrush*			m_pCurrentBrush;	
@@ -58,6 +62,9 @@ public:
 	GLubyte* GetOriginalPixel( int x, int y );   
 	// Get the color of the original picture at the specified point	
 	GLubyte* GetOriginalPixel( const Point p );  
+	// Helper function to compute the gradient
+	int getGx(const Point p);
+	int getGy(const Point p);
 
 
 private:

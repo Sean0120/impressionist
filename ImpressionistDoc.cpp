@@ -14,8 +14,13 @@
 
 // Include individual brush headers here.
 #include "PointBrush.h"
-
-
+#include "CircleBrush.h"
+#include "LineBrush.h"
+#include "ScatteredPointBrush.h"
+#include "ScatteredLineBrush.h"
+#include "ScatteredCircleBrush.h"
+#include "BlurBrush.h"
+#include "SharpeningBrush.h"
 #define DESTROY(p)	{  if ((p)!=NULL) {delete [] p; p=NULL; } }
 
 ImpressionistDoc::ImpressionistDoc() 
@@ -26,6 +31,7 @@ ImpressionistDoc::ImpressionistDoc()
 	m_nWidth		= -1;
 	m_ucBitmap		= NULL;
 	m_ucPainting	= NULL;
+	m_ucUndoPainting = NULL;
 
 
 	// create one instance of each brush
@@ -45,7 +51,12 @@ ImpressionistDoc::ImpressionistDoc()
 		= new ScatteredLineBrush( this, "Scattered Lines" );
 	ImpBrush::c_pBrushes[BRUSH_SCATTERED_CIRCLES]	
 		= new ScatteredCircleBrush( this, "Scattered Circles" );
-
+	//the new brush :: blur
+	ImpBrush::c_pBrushes[BRUSH_BLUR]
+		= new BlurBrush(this, "Blur");
+	//the new brush :: sharpening
+	ImpBrush::c_pBrushes[BRUSH_SHARPENING]
+		= new SharpeningBrush(this, "Sharpening");
 	// make one of the brushes current
 	m_pCurrentBrush	= ImpBrush::c_pBrushes[0];
 
@@ -84,19 +95,25 @@ int ImpressionistDoc::getSize()
 {
 	return m_pUI->getSize();
 }
-
 //  return the line width of the line brush
 int ImpressionistDoc::getLineWidth()
 {
-    return m_pUI->getLineWidth();
+	return m_pUI->getLineWidth();
 }
-
 //  return the line angle of the line brush
 int ImpressionistDoc::getLineAngle()
 {
-    return m_pUI->getLineAngle();
+	return m_pUI->getLineAngle();
 }
-
+//return the alpha
+float ImpressionistDoc::getAlpha() {
+	return m_pUI->getAlpha();
+}
+//get the stroke direction
+int ImpressionistDoc::getStrokeDirection()
+{
+	return m_pUI->getStrokeDirection();
+}
 
 //---------------------------------------------------------
 // Load the specified image
@@ -125,6 +142,7 @@ int ImpressionistDoc::loadImage(char *iname)
 	// release old storage
 	if ( m_ucBitmap ) delete [] m_ucBitmap;
 	if ( m_ucPainting ) delete [] m_ucPainting;
+	if (m_ucUndoPainting) delete[] m_ucUndoPainting;
 
 	m_ucBitmap		= data;
 
@@ -170,7 +188,7 @@ int ImpressionistDoc::saveImage(char *iname)
 //-----------------------------------------------------------------
 int ImpressionistDoc::clearCanvas() 
 {
-
+	if (m_ucUndoPainting) delete[] m_ucUndoPainting;
 	// Release old storage
 	if ( m_ucPainting ) 
 	{
@@ -185,6 +203,88 @@ int ImpressionistDoc::clearCanvas()
 	}
 	
 	return 0;
+}
+
+//load another image
+int ImpressionistDoc::loadAnotherImage(char *iname)
+{
+	// try to open the image to read
+	unsigned char*	data;
+	int				width,
+		height;
+
+	if ((data = readBMP(iname, width, height)) == NULL)
+	{
+		fl_alert("Can't load bitmap file");
+		return 0;
+	}
+
+	// reflect the fact of loading the new image
+	if (m_nWidth != width || m_nPaintWidth != width || m_nHeight != height) {
+		fl_alert("Dimension is different from the previous one");
+		return 0;
+	}
+	
+
+	// release old storage
+	
+	if (m_ucPainting) delete[] m_ucPainting;
+	
+	for (int i = 0; i < width*height * 3; i++) {
+		m_ucBitmap[i] = (m_ucBitmap[i] + data[i]) / 2;
+	}
+	delete [] data;
+	// allocate space for draw view
+	m_ucPainting = new unsigned char[width*height * 3];
+	memset(m_ucPainting, 0, width*height * 3);
+
+	m_pUI->m_mainWindow->resize(m_pUI->m_mainWindow->x(),
+		m_pUI->m_mainWindow->y(),
+		width * 2,
+		height + 25);
+
+	// display it on origView
+	m_pUI->m_origView->resizeWindow(width, height);
+	m_pUI->m_origView->refresh();
+
+	// refresh paint view as well
+	m_pUI->m_paintView->resizeWindow(width, height);
+	m_pUI->m_paintView->refresh();
+
+
+	return 1;
+}
+//the function for New Mural Image
+int ImpressionistDoc::setMuralImage(char* iname) {
+	// try to open the image to read
+	unsigned char*	data;
+	int				width,
+		height;
+
+	if ((data = readBMP(iname, width, height)) == NULL)
+	{
+		fl_alert("Can't load bitmap file");
+		return 0;
+	}
+
+	// reflect the fact of loading the new image
+	if (m_nWidth != width || m_nPaintWidth != width || m_nHeight != height) {
+		fl_alert("Dimension is different from the previous one");
+		return 0;
+	}
+
+
+	// release old storage
+
+	if (m_ucBitmap) delete[] m_ucBitmap;
+	m_ucBitmap =  data;
+
+	// display it on origView
+	m_pUI->m_origView->resizeWindow(width, height);
+	m_pUI->m_origView->refresh();
+
+
+
 }
 
 //------------------------------------------------------------------
@@ -213,3 +313,17 @@ GLubyte* ImpressionistDoc::GetOriginalPixel( const Point p )
 	return GetOriginalPixel( p.x, p.y );
 }
 
+//Helper function to compute the gradient
+int ImpressionistDoc::getGx(const Point p)
+{
+	return (*(GetOriginalPixel(p.x + 1, p.y - 1)) - *(GetOriginalPixel(p.x - 1, p.y - 1))) +
+		(*(GetOriginalPixel(p.x + 1, p.y + 1)) - *(GetOriginalPixel(p.x - 1, p.y + 1))) +
+		2 * (*(GetOriginalPixel(p.x + 1, p.y)) - *(GetOriginalPixel(p.x - 1, p.y)));
+}
+
+int ImpressionistDoc::getGy(const Point p)
+{
+	return (*(GetOriginalPixel(p.x + 1, p.y - 1)) - *(GetOriginalPixel(p.x + 1, p.y + 1))) +
+		(*(GetOriginalPixel(p.x - 1, p.y - 1)) - *(GetOriginalPixel(p.x - 1, p.y + 1))) +
+		2 * (*(GetOriginalPixel(p.x, p.y - 1)) - *(GetOriginalPixel(p.x, p.y + 1)));
+}

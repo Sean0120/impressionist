@@ -8,7 +8,7 @@
 #ifndef ScatteredCircleBrush_hpp
 #define ScatteredCircleBrush_hpp
 
-#include "ImpBrush"
+#include "ImpBrush.h"
 
 class ScatteredCircleBrush : public ImpBrush
 {

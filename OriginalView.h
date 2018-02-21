@@ -29,13 +29,16 @@ public:
 	void refresh();
 
 	void resizeWindow(int width, int height);
-
+	void setMarkerPoint(Point p);
+	void drawMarkerPoint();
 	ImpressionistDoc*	m_pDoc;
-
+	//these two functions are useless
+	//	int getWinWidth();
+	//	int getWinHeight();
 private:
-	int	m_nWindowWidth, 
-		m_nWindowHeight;
+	int	m_nWindowWidth, m_nWindowHeight;
 
+	Point markerPoint;
 };
 
 #endif

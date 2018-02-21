@@ -4,12 +4,14 @@
 // The code maintaining the painting view of the input images
 //
 
-#include "impressionist.h"
-#include "impressionistDoc.h"
-#include "impressionistUI.h"
+#include "Impressionist.h"
+#include "ImpressionistDoc.h"
+#include "ImpressionistUI.h"
 #include "paintview.h"
 #include "ImpBrush.h"
-
+#include <iostream>
+#include <math.h>
+using namespace std;
 
 #define LEFT_MOUSE_DOWN		1
 #define LEFT_MOUSE_DRAG		2
@@ -28,15 +30,15 @@ static int		eventToDo;
 static int		isAnEvent=0;
 static Point	coord;
 
-PaintView::PaintView(int			x, 
-					 int			y, 
-					 int			w, 
-					 int			h, 
-					 const char*	l)
-						: Fl_Gl_Window(x,y,w,h,l)
+PaintView::PaintView(int			x,
+	int			y,
+	int			w,
+	int			h,
+	const char*	l)
+	: Fl_Gl_Window(x, y, w, h, l), rightMouseStart(), rightMouseEnd(), leftMouseStart(), leftMouseEnd()
 {
-	m_nWindowWidth	= w;
-	m_nWindowHeight	= h;
+	m_nWindowWidth = w;
+	m_nWindowHeight = h;
 
 }
 
@@ -59,6 +61,10 @@ void PaintView::draw()
 		ortho();
 
 		glClear( GL_COLOR_BUFFER_BIT );
+
+		// Enable Alpha
+		glEnable(GL_BLEND);
+		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	}
 
 	Point scrollpos;// = GetScrollPosition();
@@ -105,9 +111,54 @@ void PaintView::draw()
 		switch (eventToDo) 
 		{
 		case LEFT_MOUSE_DOWN:
+			if (source.x > m_nDrawWidth || source.y < 0)
+				break;
+			if (m_pDoc->getStrokeDirection() == BRUSH_DIRECTION) {
+
+				leftMouseStart = target;
+				break;
+			}
+			SaveUndoPainting();
 			m_pDoc->m_pCurrentBrush->BrushBegin( source, target );
 			break;
 		case LEFT_MOUSE_DRAG:
+			if (source.x > m_nDrawWidth || source.y < 0)
+				break;
+			if (m_pDoc->getStrokeDirection() == BRUSH_DIRECTION) {
+				leftMouseEnd = target;
+				int angle;
+				double xDiff = leftMouseEnd.x - leftMouseStart.x;
+				double yDiff = leftMouseEnd.y - leftMouseStart.y;
+				if (xDiff == 0) {
+					if (yDiff == 0)
+						break;
+					else if (yDiff>0)
+						angle = 90;
+					else
+						angle = 270;
+				}
+				else {
+					double arcAngle = atan(yDiff / xDiff);
+					const double Pi = 3.1415926536;
+					angle = arcAngle / Pi * 180;
+					if (xDiff>0) {
+						if (yDiff == 0)
+							angle = 0;
+						else if (yDiff<0)
+							angle = 360 + angle;
+					}
+					else if (xDiff<0) {
+						angle = angle + 180;
+					}
+				}
+				m_pUI->setLineAngle(angle);
+
+				m_pDoc->m_pCurrentBrush->BrushMove(source, target);
+
+				leftMouseStart = target;
+
+				break;
+			}
 			m_pDoc->m_pCurrentBrush->BrushMove( source, target );
 			break;
 		case LEFT_MOUSE_UP:
@@ -117,13 +168,61 @@ void PaintView::draw()
 			RestoreContent();
 			break;
 		case RIGHT_MOUSE_DOWN:
+			if (m_pDoc->getStrokeDirection() == SLIDER) {
+				SaveCurrentContent();
+
+				rightMouseStart = target;
+			}   //set the origin of right mouse
+
 
 			break;
 		case RIGHT_MOUSE_DRAG:
+			if (m_pDoc->getStrokeDirection() == SLIDER) {
+				RestoreContent();
+
+				rightMouseEnd = target;
+
+				glBegin(GL_LINES);
+
+				glColor3f(1, 0, 0);
+				glVertex2d(rightMouseStart.x, rightMouseStart.y);
+				glVertex2d(rightMouseEnd.x, rightMouseEnd.y);
+				glEnd();
+			}   //draw a red line from rightMouseStart to rightMouseEnd and set the line angle in UI
+
 
 			break;
 		case RIGHT_MOUSE_UP:
-
+			if (m_pDoc->getStrokeDirection() == SLIDER) {
+				rightMouseEnd = target;
+				int angle;
+				double xDiff = rightMouseEnd.x - rightMouseStart.x;
+				double yDiff = rightMouseEnd.y - rightMouseStart.y;
+				if (xDiff == 0) {
+					if (yDiff == 0)
+						break;
+					else if (yDiff>0)
+						angle = 90;
+					else
+						angle = 270;
+				}
+				else {
+					double arcAngle = atan(yDiff / xDiff);
+					const double Pi = 3.1415926536;
+					angle = arcAngle / Pi * 180;
+					if (xDiff>0) {
+						if (yDiff == 0)
+							angle = 0;
+						else if (yDiff<0)
+							angle = 360 + angle;
+					}
+					else if (xDiff<0) {
+						angle = angle + 180;
+					}
+				}
+				m_pUI->setLineAngle(angle);
+				RestoreContent();
+			}
 			break;
 
 		default:
@@ -144,6 +243,10 @@ void PaintView::draw()
 
 int PaintView::handle(int event)
 {
+	coord.x = Fl::event_x();
+	coord.y = Fl::event_y();
+	Point marker(coord.x + m_nStartCol, m_nEndRow - coord.y);
+
 	switch(event)
 	{
 	case FL_ENTER:
@@ -167,6 +270,10 @@ int PaintView::handle(int event)
 		else
 			eventToDo=LEFT_MOUSE_DRAG;
 		isAnEvent=1;
+		//set the maker here 
+		m_pUI->setMarkerPoint(marker);
+		
+		
 		redraw();
 		break;
 	case FL_RELEASE:
@@ -182,6 +289,8 @@ int PaintView::handle(int event)
 	case FL_MOVE:
 		coord.x = Fl::event_x();
 		coord.y = Fl::event_y();
+		//set the marker here 
+		m_pUI->setMarkerPoint(marker);
 		break;
 	default:
 		return 0;
@@ -239,4 +348,12 @@ void PaintView::RestoreContent()
 				  m_pPaintBitstart);
 
 //	glDrawBuffer(GL_FRONT);
+}
+
+void PaintView::SaveUndoPainting() {
+	delete[] m_pDoc->m_ucUndoPainting;
+	int buffer_size = m_pDoc->m_nPaintWidth*m_pDoc->m_nPaintHeight * 3;
+	m_pDoc->m_ucUndoPainting = new unsigned char[buffer_size];
+	memcpy(m_pDoc->m_ucUndoPainting, m_pDoc->m_ucPainting,buffer_size);
+	
 }
