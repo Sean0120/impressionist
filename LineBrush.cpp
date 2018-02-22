@@ -50,8 +50,8 @@ void LineBrush::BrushMove( const Point source, const Point target )
 	else if (pDoc->getStrokeDirection() == GRADIENT) {
 		int Gx = pDoc->getGx(source);
 		int Gy = pDoc->getGy(source);
-		double cosAngle = Gx / sqrt(Gx*Gx + Gy*Gy);
-		double sinAngle = Gy / sqrt(Gx*Gx + Gy*Gy);
+		double cosAngle = Gy / sqrt(Gx*Gx + Gy*Gy);
+		double sinAngle = -Gx / sqrt(Gx*Gx + Gy*Gy);
 		glVertex2d(target.x - size / 2 * cosAngle, target.y - size / 2 * sinAngle);
 		glVertex2d(target.x + size / 2 * cosAngle, target.y + size / 2 * sinAngle);
 	}
