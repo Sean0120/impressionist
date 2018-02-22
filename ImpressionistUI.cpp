@@ -372,6 +372,15 @@ void ImpressionistUI::cb_color_selection(Fl_Widget* o, void* v) {
 	((ImpressionistUI*)(o->user_data()))->m_ncolors[1] = float(((Fl_Color_Chooser *)o)->g());
 	((ImpressionistUI*)(o->user_data()))->m_ncolors[2] = float(((Fl_Color_Chooser *)o)->b());
 };
+//for the dim background
+void ImpressionistUI::cb_dim(Fl_Menu_* o, void* v) {
+	whoami(o)->m_DimDialog->show();
+}
+void ImpressionistUI::cb_dimsliders(Fl_Widget* o, void* v) {
+	((ImpressionistUI*)(o->user_data()))->m_nAlphaOfBackground = float(((Fl_Slider *)o)->value());
+	((ImpressionistUI*)(o->user_data()))->m_paintView->refresh();
+
+}
 //------------------------------
 //some new functions wothout implementation 
 //TODO:
@@ -555,6 +564,8 @@ Fl_Menu_Item ImpressionistUI::menuitems[] = {
 		{ "&Quit",			FL_ALT + 'q', (Fl_Callback *)ImpressionistUI::cb_exit },
 		{ 0 },
 	{ "&Display",		0, 0, 0, FL_SUBMENU },
+		{ "&Dim Background",			FL_ALT + 'b', (Fl_Callback *)ImpressionistUI::cb_dim },
+
 		{ "&Undo",			FL_ALT + 'd', (Fl_Callback *)ImpressionistUI::cb_undo_painting },
 		{ "&Switch views",			FL_ALT + 's', (Fl_Callback *)ImpressionistUI::cb_switch_view },
 		{ "&Original Image",			FL_ALT + 'o', (Fl_Callback *)ImpressionistUI::cb_original__image },
@@ -641,6 +652,8 @@ ImpressionistUI::ImpressionistUI() {
 	m_ncolors[1] = 1.0;
 	m_ncolors[2] = 1.0;
 	m_StrokeDirection = SLIDER;
+	m_nAlphaOfBackground = 0.0;
+	m_nInDim = FALSE;
 	// brush dialog definition
 	m_brushDialog = new Fl_Window(400, 325, "Brush Dialog");
 		// Add a brush type choice to the dialog
@@ -723,5 +736,22 @@ ImpressionistUI::ImpressionistUI() {
 	m_colorChooser->user_data((void*)(this));
 	m_colorChooser->callback(cb_color_selection);
 	m_colorChooser->rgb(1.0, 1.0, 1.0);
+
 	m_colorSelectionDialog->end();
+
+	m_DimDialog = new Fl_Window(200, 200, "Dim Alpha Chooser");
+		m_DimSlider = new Fl_Value_Slider(10, 10, 150, 20, "Alpha");
+		m_DimSlider->user_data((void*)(this));
+		m_DimSlider->type(FL_HOR_NICE_SLIDER);
+		m_DimSlider->labelfont(FL_COURIER);
+		m_DimSlider->labelsize(12);
+		m_DimSlider->minimum(0.00);
+		m_DimSlider->maximum(1.00);
+		m_DimSlider->step(0.01);
+		m_DimSlider->value(m_nAlphaOfBackground);
+		m_DimSlider->align(FL_ALIGN_RIGHT);
+		m_DimSlider->callback(cb_dimsliders);
+
+
+	m_DimDialog->end();
 }

@@ -48,6 +48,9 @@ public:
 	unsigned char*	m_ucPainting;
 	//Bitmaps for undo paiting
 	unsigned char*  m_ucUndoPainting;
+	//Bitmaps for background
+	unsigned char* m_ucPaintingWithDim;
+
 
 	// The current active brush.
 	ImpBrush*			m_pCurrentBrush;	

@@ -53,8 +53,11 @@ void ImpBrush::SetColor (const Point source)
 	new_color_result[0] = color[0] * new_color[0];
 	new_color_result[1] = color[1] * new_color[1];
 	new_color_result[2] = color[2] * new_color[2];
-
+	for (int i = 0; i < 3; i++) {
+		if (new_color_result[i] == 0) {
+			new_color_result[i] = 1;
+		}
+	}
 	glColor4ub(new_color_result[0], new_color_result[1], new_color_result[2], new_alpha);
-
 
 }

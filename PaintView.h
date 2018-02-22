@@ -33,12 +33,13 @@ public:
 	ImpressionistDoc* m_pDoc;
 	ImpressionistUI *m_pUI;
 
-	
+	void switchToDim();
 
 	Point rightMouseStart, rightMouseEnd;	//for right mouse use
 	Point leftMouseStart, leftMouseEnd;
 
 private:
+	GLvoid* m_pDimBitstart;
 	GLvoid* m_pPaintBitstart;
 	int		m_nDrawWidth,
 			m_nDrawHeight,

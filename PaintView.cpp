@@ -83,6 +83,9 @@ void PaintView::draw()
 
 	m_pPaintBitstart = m_pDoc->m_ucPainting + 
 		3 * ((m_pDoc->m_nPaintWidth * startrow) + scrollpos.x);
+	m_pDimBitstart = m_pDoc->m_ucPaintingWithDim +
+		3 * ((m_pDoc->m_nPaintWidth * (startrow)) + scrollpos.x);
+
 
 	m_nDrawWidth	= drawWidth;
 	m_nDrawHeight	= drawHeight;
@@ -97,9 +100,12 @@ void PaintView::draw()
 		RestoreContent();
 
 	}
+		
 
 	if ( m_pDoc->m_ucPainting && isAnEvent) 
 	{
+
+
 
 		// Clear it after processing.
 		isAnEvent	= 0;	
@@ -120,6 +126,10 @@ void PaintView::draw()
 			}
 			SaveUndoPainting();
 			m_pDoc->m_pCurrentBrush->BrushBegin( source, target );
+
+			SaveCurrentContent();
+			RestoreContent();
+
 			break;
 		case LEFT_MOUSE_DRAG:
 			if (source.x > m_nDrawWidth || source.y < 0)
@@ -160,6 +170,12 @@ void PaintView::draw()
 				break;
 			}
 			m_pDoc->m_pCurrentBrush->BrushMove( source, target );
+
+
+			SaveCurrentContent();
+			RestoreContent();
+
+
 			break;
 		case LEFT_MOUSE_UP:
 			m_pDoc->m_pCurrentBrush->BrushEnd( source, target );
@@ -230,7 +246,14 @@ void PaintView::draw()
 			break;
 		}
 	}
-
+	if (m_pUI->m_nAlphaOfBackground != 0) {
+		switchToDim();
+		glDrawBuffer(GL_BACK);
+		glRasterPos2i(0, m_nWindowHeight - drawHeight);
+		glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+		glPixelStorei(GL_UNPACK_ROW_LENGTH, m_pDoc->m_nWidth);
+		glDrawPixels(drawWidth, drawHeight, GL_RGB, GL_UNSIGNED_BYTE, m_pDimBitstart);
+	}
 	glFlush();
 
 	#ifndef MESA
@@ -356,4 +379,29 @@ void PaintView::SaveUndoPainting() {
 	m_pDoc->m_ucUndoPainting = new unsigned char[buffer_size];
 	memcpy(m_pDoc->m_ucUndoPainting, m_pDoc->m_ucPainting,buffer_size);
 	
+}
+
+//To calculate the dim version
+void PaintView::switchToDim() {
+	
+	float Alpha = m_pUI->m_nAlphaOfBackground;
+	for (int i = 0; i < m_pDoc->m_nHeight *m_pDoc->m_nWidth * 3; ++i) {
+		if (m_pDoc->m_ucPainting[i] == 0) {
+			m_pDoc->m_ucPaintingWithDim[i] = Alpha * m_pDoc->m_ucBitmap[i];
+
+			
+		}
+		else
+		{
+			m_pDoc->m_ucPaintingWithDim[i] = m_pDoc->m_ucPainting[i];
+		}
+	}
+	/*
+	if (m_pUI->m_nInDim) {
+		unsigned char* temp = m_pDoc->m_ucPaintingWithDim;
+		m_pDoc->m_ucPaintingWithDim = m_pDoc->m_ucPainting;
+		m_pDoc->m_ucPainting = temp;
+	}
+	m_pUI->m_paintView->refresh();
+	*/
 }

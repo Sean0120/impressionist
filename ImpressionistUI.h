@@ -47,7 +47,9 @@ public:
 	//for color selection dialog
 	Fl_Window*			m_colorSelectionDialog;
 	Fl_Color_Chooser*   m_colorChooser;
-
+	//for dim background 
+	Fl_Window*          m_DimDialog;
+	Fl_Slider*			m_DimSlider;
 	// Member functions
 	void				setDocument(ImpressionistDoc* doc);
 	ImpressionistDoc*	getDocument();
@@ -80,6 +82,8 @@ public:
 	int                 getStrokeDirection();
 	void                setStrokeDirection(int direction);
 
+	float				m_nAlphaOfBackground;// i am too lazy to build a get function, so i make it public
+	bool				m_nInDim;//indicate whether is in dim background mode
 private:
 	ImpressionistDoc*	m_pDoc;		// pointer to document to communicate with the document
 
@@ -90,6 +94,10 @@ private:
 	float   m_nAlpha;
 	float   m_ncolors[3];
 	int     m_StrokeDirection;  //type of direction
+
+
+
+
 	// Static class members
 	static Fl_Menu_Item		menuitems[];
 	static Fl_Menu_Item		brushTypeMenu[NUM_BRUSH_TYPE+1];
@@ -122,6 +130,8 @@ private:
 	static void	cb_paintly(Fl_Widget* o, void* v);
 	static void	cb_load_edge_image(Fl_Widget* o, void* v);
 	//add some new helper function here for "Display" in menu bar
+	static void cb_dim(Fl_Menu_* o, void* v);
+	static void cb_dimsliders(Fl_Widget* o, void* v);
 	static void cb_undo_painting(Fl_Menu_* o, void* v);
 	static void cb_switch_view(Fl_Menu_ * o, void * v);
 	static void	cb_original__image(Fl_Widget* o, void* v);
