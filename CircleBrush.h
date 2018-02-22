@@ -13,7 +13,7 @@
 class CircleBrush : public ImpBrush
 {
 public:
-    CircleBrush( ImpressionistDoc* pDoc, char* name = NULL)
+	CircleBrush(ImpressionistDoc* pDoc, char* name = NULL);
 
     void BrushBegin( const Point source, const Point target );
     void BrushMove( const Point source, const Point target );

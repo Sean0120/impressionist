@@ -8,9 +8,11 @@
 #include <FL/fl_ask.h>
 
 #include <math.h>
-
+#include<iostream>
 #include "impressionistUI.h"
 #include "impressionistDoc.h"
+#include <iostream>
+using namespace std;
 //test
 /*
 //------------------------------ Widget Examples -------------------------------------------------
@@ -218,7 +220,30 @@ void ImpressionistUI::cb_clear_canvas(Fl_Menu_* o, void* v)
 
 	pDoc->clearCanvas();
 }
+void ImpressionistUI::cb_colors(Fl_Menu_* o, void* v)
+{
+	whoami(o)->m_colorSelectionDialog->show();
+}
+//load another image
+void ImpressionistUI::cb_load_another_image(Fl_Menu_* o, void* v)
+{
+	ImpressionistDoc *pDoc = whoami(o)->getDocument();
 
+	char* newfile = fl_file_chooser("Open File?", "*.bmp", pDoc->getImageName());
+	if (newfile != NULL) {
+		pDoc->loadAnotherImage(newfile);
+	}
+}
+//set new mural image
+void ImpressionistUI::cb_set_mural_image(Fl_Menu_* o, void* v)
+{
+	ImpressionistDoc *pDoc = whoami(o)->getDocument();
+
+	char* newfile = fl_file_chooser("Open File?", "*.bmp", pDoc->getImageName());
+	if (newfile != NULL) {
+		pDoc->setMuralImage(newfile);
+	}
+}
 //------------------------------------------------------------
 // Causes the Impressionist program to exit
 // Called by the UI when the quit menu item is chosen
@@ -230,7 +255,25 @@ void ImpressionistUI::cb_exit(Fl_Menu_* o, void* v)
 
 }
 
-
+//function for switching the view 
+void ImpressionistUI::cb_switch_view(Fl_Menu_* o, void* v) {
+	ImpressionistDoc* pDoc = whoami(o)->getDocument();
+	unsigned char* temp = pDoc->m_ucBitmap;
+	pDoc->m_ucBitmap = pDoc->m_ucPainting;
+	pDoc->m_ucPainting = temp;
+	//do not forge to refresh, otherwise the view will refresh only the cursor move in the painting
+	whoami(o)->m_origView->refresh();
+	whoami(o)->m_paintView->refresh();
+};
+//the function for undoing painting
+void ImpressionistUI::cb_undo_painting(Fl_Menu_* o, void* v) {
+	ImpressionistDoc* pDoc = whoami(o)->getDocument();
+	unsigned char* temp = pDoc->m_ucUndoPainting;
+	pDoc->m_ucUndoPainting = pDoc->m_ucPainting;
+	pDoc->m_ucPainting = temp;
+	whoami(o)->m_paintView->refresh();
+	
+}
 
 //-----------------------------------------------------------
 // Brings up an about dialog box
@@ -238,7 +281,7 @@ void ImpressionistUI::cb_exit(Fl_Menu_* o, void* v)
 //-----------------------------------------------------------
 void ImpressionistUI::cb_about(Fl_Menu_* o, void* v) 
 {
-	fl_message("Impressionist FLTK version for CS341, Spring 2002");
+	fl_message("Impressionist FLTK version for CS4411, Spring 2018");
 }
 
 //------- UI should keep track of the current for all the controls for answering the query from Doc ---------
@@ -253,22 +296,20 @@ void ImpressionistUI::cb_brushChoice(Fl_Widget* o, void* v)
 	ImpressionistDoc* pDoc=pUI->getDocument();
 
 	int type=(int)v;
-    
-    //  Activate the sliders and choice when it is line brush
-    if(type==BRUSH_LINES||type==BRUSH_SCATTERED_LINES)
-    {
-        pUI->m_lineWidthSlider->activate();
-        pUI->m_lineAngleSlider->activate();
-        pUI->m_StrokeDirectionChoice->activate();
-    }
+	//  Activate the sliders and choice when it is line brush
+	if (type == BRUSH_LINES || type == BRUSH_SCATTERED_LINES)
+	{
+		pUI->m_LineWidthSlider->activate();
+		pUI->m_LineAngleSlider->activate();
+		pUI->m_StrokeDirectionChoice->activate();
+	}
+	else {
+		pUI->m_LineWidthSlider->deactivate();
+		pUI->m_LineAngleSlider->deactivate();
+		pUI->m_StrokeDirectionChoice->deactivate();
+	}
 
 	pDoc->setBrushType(type);
-}
-
-//Set the stroke direction in the stroke direction choice
-void ImpressionistUI::cb_strokeDirectionChoice(Fl_Widget* o, void* v)
-{
-    //TODO
 }
 
 //------------------------------------------------------------
@@ -293,17 +334,86 @@ void ImpressionistUI::cb_sizeSlides(Fl_Widget* o, void* v)
 	((ImpressionistUI*)(o->user_data()))->m_nSize=int( ((Fl_Slider *)o)->value() ) ;
 }
 
-//  Callback function for line width slider
+//-----------------------------------------------------------
+// Updates the line width to use from the value of the line width  slider
+// Called by the UI when the line width slider is moved
+//-----------------------------------------------------------
 void ImpressionistUI::cb_lineWidthSlides(Fl_Widget* o, void* v)
 {
-    ((ImpressionistUI*)(o->user_data()))->m_lineWidth=int( ((Fl_Slider *)o)->value() ) ;
+	((ImpressionistUI*)(o->user_data()))->m_nLineWidth = int(((Fl_Slider *)o)->value());
+}
+//-----------------------------------------------------------
+// Updates the line Angle to use from the value of the line Angle slider
+// Called by the UI when the line  Angle slider is moved
+//-----------------------------------------------------------
+void ImpressionistUI::cb_lineAngleSlides(Fl_Widget* o, void* v)
+{
+	if (((ImpressionistUI*)(o->user_data()))->m_StrokeDirection == SLIDER)
+		((ImpressionistUI*)(o->user_data()))->m_nLineAngle = int(((Fl_Slider *)o)->value());
 }
 
-//  Callback function for line angle slider
-void ImpressionistUI::cb_lineAngleSlides(Fl_Widget* o, void* o)
+//Callback function for stroke direction choice
+void ImpressionistUI::cb_strokeDirectionChoice(Fl_Widget* o, void* v)
 {
-    ((ImpressionistUI*)(o->user_data()))->m_lineAngle=int( ((Fl_Slider *)o)->value() ) ;
+	((ImpressionistUI*)(o->user_data()))->m_StrokeDirection = int(((Fl_Choice *)o)->value());
 }
+
+//-----------------------------------------------------------
+// Updates the Alpha to use from the value of the Alpha slider
+// Called by the UI when the Alpha slider is moved
+//-----------------------------------------------------------
+void ImpressionistUI::cb_alphaSlides(Fl_Widget* o, void* v)
+{
+	((ImpressionistUI*)(o->user_data()))->m_nAlpha = float(((Fl_Slider *)o)->value());
+}
+//set the blending color
+void ImpressionistUI::cb_color_selection(Fl_Widget* o, void* v) {
+	((ImpressionistUI*)(o->user_data()))->m_ncolors[0] = float(((Fl_Color_Chooser *)o)->r());
+	((ImpressionistUI*)(o->user_data()))->m_ncolors[1] = float(((Fl_Color_Chooser *)o)->g());
+	((ImpressionistUI*)(o->user_data()))->m_ncolors[2] = float(((Fl_Color_Chooser *)o)->b());
+};
+
+//Callback functions for auto draw
+void ImpressionistUI::cb_autoDrawSpaceSlides(Fl_Widget* o, void* v)
+{
+	((ImpressionistUI*)(o->user_data()))->m_nAutoDrawSpace = int(((Fl_Slider *)o)->value());
+}
+
+void ImpressionistUI::cb_randomSizeButton(Fl_Widget* o, void* v)
+{
+	ImpressionistUI *pUI = ((ImpressionistUI*)(o->user_data()));
+
+	if (pUI->m_nRandomSize == TRUE) pUI->m_nRandomSize = FALSE;
+	else pUI->m_nRandomSize = TRUE;
+}
+
+void ImpressionistUI::cb_autoDrawButton(Fl_Widget* o, void* v)
+{
+	ImpressionistDoc * pDoc = ((ImpressionistUI*)(o->user_data()))->getDocument();
+
+	pDoc->autoDraw();
+}
+
+//------------------------------
+//some new functions wothout implementation 
+//TODO:
+
+
+void ImpressionistUI::cb_paintly(Fl_Widget* o, void* v) {};
+void ImpressionistUI::cb_load_edge_image(Fl_Widget* o, void* v) {};
+
+
+void ImpressionistUI::cb_original__image(Fl_Widget* o, void* v) {};
+void ImpressionistUI::cb_edge_image(Fl_Widget* o, void* v) {};
+void ImpressionistUI::cb_another_image(Fl_Widget* o, void* v) {};
+
+void ImpressionistUI::cb_faster(Fl_Widget* o, void* v) {};
+void ImpressionistUI::cb_safer(Fl_Widget* o, void* v) {};
+
+//------------------------------
+
+
+
 
 //---------------------------------- per instance functions --------------------------------------
 
@@ -360,40 +470,120 @@ void ImpressionistUI::setSize( int size )
 {
 	m_nSize=size;
 
-	if (size<=40) 
+	if (size<=40&&m_paintView->isAutoDraw==false) //!!!!!!!Remeber to check/delete this if there is a bug
 		m_BrushSizeSlider->value(m_nSize);
 }
-
-//  Return the line width
+//------------------------------------------------
+// Return the line width
+//------------------------------------------------
 int ImpressionistUI::getLineWidth()
 {
-    return m_lineWidth;
+	return m_nLineWidth;
 }
 
-//  Set the line width
-void ImpressionistUI::setLineWidth( int lineWidth )
+//-------------------------------------------------
+// Set the line width
+//-------------------------------------------------
+void ImpressionistUI::setLineWidth(int width)
 {
-    m_lineWidth=lineWidth;
-    
-    if(lineWidth<=40)
-        m_lineWidthSlider->value(m_lineWidth);
+	m_nLineWidth = width;
+
+	if (width <= 40)
+		m_LineWidthSlider->value(m_nLineWidth);
 }
 
-//  Return the line angle
+
+
+//------------------------------------------------
+// Return the line angle
+//------------------------------------------------
 int ImpressionistUI::getLineAngle()
 {
-    return m_lineAngle;
+	return m_nLineAngle;
 }
 
-//  Set the line angle
-void ImpressionistUI::setLineAngle( int lineAngle )
+//-------------------------------------------------
+// Set the line angle
+//-------------------------------------------------
+void ImpressionistUI::setLineAngle(int angle)
 {
-    m_lineAngle=lineAngle;
-    
-    if(lineAngle<360)
-        m_lineWidthSlider->value(m_lineAngle);
+	m_nLineAngle = angle;
+
+	if (m_StrokeDirection == SLIDER)
+		if (angle <= 359)
+			m_LineAngleSlider->value(m_nLineAngle);
 }
 
+//Get the type of stroke direction
+int ImpressionistUI::getStrokeDirection()
+{
+	return m_StrokeDirection;
+}
+
+//Set the type of stroke direction
+void ImpressionistUI::setStrokeDirection(int direction)
+{
+	m_StrokeDirection = direction;
+}
+//------------------------------------------------
+// Return the line angle
+//------------------------------------------------
+float ImpressionistUI::getAlpha()
+{
+
+	
+	return m_nAlpha;
+}
+
+//-------------------------------------------------
+// Set the line angle
+//-------------------------------------------------
+void ImpressionistUI::setAlpha(float alpha)
+{
+	m_nAlpha = alpha;
+
+	if (alpha <= 1.00)
+		m_AlphaSlider->value(m_nAlpha);
+}
+
+void ImpressionistUI::setMarkerPoint(Point p) {
+	m_origView->setMarkerPoint(p);
+}
+//for color selection 
+float*ImpressionistUI::getColor() {
+	return 	m_ncolors;
+};
+void  ImpressionistUI::setColor(float r, float g, float b) {
+	m_ncolors[0] = r;
+	m_ncolors[1] = g;
+	m_ncolors[2] = b;
+}
+
+//for auto draw
+int ImpressionistUI::getAutoDrawSpace()
+{
+	return m_nAutoDrawSpace;
+}
+
+void ImpressionistUI::setAutoDrawSpace(int space)
+{
+	m_nAutoDrawSpace = space;
+
+	if (space <= 16)
+		m_AutoDrawSpaceSlider->value(m_nAutoDrawSpace);
+}
+
+bool ImpressionistUI::getRandomSize()
+{
+	return m_nRandomSize;
+}
+
+void ImpressionistUI::setRandomSize(bool isRandom)
+{
+	m_nRandomSize = isRandom;
+
+	m_RandomSizeButton->value(m_nRandomSize);
+}
 
 
 // Main menu definition
@@ -403,10 +593,31 @@ Fl_Menu_Item ImpressionistUI::menuitems[] = {
 		{ "&Save Image...",	FL_ALT + 's', (Fl_Callback *)ImpressionistUI::cb_save_image },
 		{ "&Brushes...",	FL_ALT + 'b', (Fl_Callback *)ImpressionistUI::cb_brushes }, 
 		{ "&Clear Canvas", FL_ALT + 'c', (Fl_Callback *)ImpressionistUI::cb_clear_canvas, 0, FL_MENU_DIVIDER },
-		
+		//add some new button here 
+		{ "&Colors",	FL_ALT + 'k', (Fl_Callback *)ImpressionistUI::cb_colors },
+		{ "&Paintly",	FL_ALT + 'p', (Fl_Callback *)ImpressionistUI::cb_paintly, 0, FL_MENU_DIVIDER},
+
+		{ "Set Mural Image",	FL_ALT + 'm', (Fl_Callback *)ImpressionistUI::cb_set_mural_image },
+		{ "Load Edge Image...",	FL_ALT + 'e', (Fl_Callback *)ImpressionistUI::cb_load_edge_image },
+		{ "Load Another Image...",	FL_ALT + 'a', (Fl_Callback *)ImpressionistUI::cb_load_another_image, 0, FL_MENU_DIVIDER },
+
+
 		{ "&Quit",			FL_ALT + 'q', (Fl_Callback *)ImpressionistUI::cb_exit },
 		{ 0 },
+	{ "&Display",		0, 0, 0, FL_SUBMENU },
+		{ "&Undo",			FL_ALT + 'd', (Fl_Callback *)ImpressionistUI::cb_undo_painting },
+		{ "&Switch views",			FL_ALT + 's', (Fl_Callback *)ImpressionistUI::cb_switch_view },
+		{ "&Original Image",			FL_ALT + 'o', (Fl_Callback *)ImpressionistUI::cb_original__image },
+		{ "&Edge Image",			FL_ALT + 'e', (Fl_Callback *)ImpressionistUI::cb_edge_image },
+		{ "&Another Image...",	FL_ALT + 'a', (Fl_Callback *)ImpressionistUI::cb_another_image, 0, FL_MENU_DIVIDER },
+		{0},
 
+	{ "&Options",		0, 0, 0, FL_SUBMENU },
+		{ "&Faster",			FL_ALT + 'f', (Fl_Callback *)ImpressionistUI::cb_faster },
+		{ "&Safer",	FL_ALT + 's', (Fl_Callback *)ImpressionistUI::cb_safer, 0, FL_MENU_DIVIDER },
+		{0},
+
+		//end here
 	{ "&Help",		0, 0, 0, FL_SUBMENU },
 		{ "&About",	FL_ALT + 'a', (Fl_Callback *)ImpressionistUI::cb_about },
 		{ 0 },
@@ -422,13 +633,21 @@ Fl_Menu_Item ImpressionistUI::brushTypeMenu[NUM_BRUSH_TYPE+1] = {
   {"Scattered Points",	FL_ALT+'q', (Fl_Callback *)ImpressionistUI::cb_brushChoice, (void *)BRUSH_SCATTERED_POINTS},
   {"Scattered Lines",	FL_ALT+'m', (Fl_Callback *)ImpressionistUI::cb_brushChoice, (void *)BRUSH_SCATTERED_LINES},
   {"Scattered Circles",	FL_ALT+'d', (Fl_Callback *)ImpressionistUI::cb_brushChoice, (void *)BRUSH_SCATTERED_CIRCLES},
+  {"Blur",				FL_ALT+'b', (Fl_Callback *)ImpressionistUI::cb_brushChoice, (void *)BRUSH_BLUR },
+  { "Sharpenning",		FL_ALT + 's', (Fl_Callback *)ImpressionistUI::cb_brushChoice, (void *)BRUSH_SHARPENING },
+
   {0}
 };
 
-//stroke direction memu definition
-Fl_Menu_Item ImpressionistUI::strokeDirectionMenu[4] = {
-    {0};//TODO
-}
+
+//  Stroke direction choice menu definition
+Fl_Menu_Item ImpressionistUI::strokeDirectionMenu[3 + 1] = {
+	{ "Slider/Right Mouse", FL_ALT + 's', (Fl_Callback *)ImpressionistUI::cb_strokeDirectionChoice, (void *)SLIDER },
+	{ "Gradient", FL_ALT + 'g', (Fl_Callback *)ImpressionistUI::cb_strokeDirectionChoice, (void *)GRADIENT },
+	{ "Brush Direction", FL_ALT + 'b', (Fl_Callback *)ImpressionistUI::cb_strokeDirectionChoice, (void *)BRUSH_DIRECTION },
+	{ 0 }
+};
+
 
 //----------------------------------------------------
 // Constructor.  Creates all of the widgets.
@@ -449,7 +668,8 @@ ImpressionistUI::ImpressionistUI() {
 			// install paint view window
 			m_paintView = new PaintView(300, 25, 300, 275, "This is the paint view");//0jon
 			m_paintView->box(FL_DOWN_FRAME);
-
+			m_paintView->m_pUI = this; // store the UI pointer in the paint to build a bridge between the original view and paint view
+			
 			// install original view window
 			m_origView = new OriginalView(0, 25, 300, 275, "This is the orig view");//300jon
 			m_origView->box(FL_DOWN_FRAME);
@@ -462,10 +682,15 @@ ImpressionistUI::ImpressionistUI() {
 	// init values
 
 	m_nSize = 10;
-    
-    m_lineWidth=1;
-    m_lineAngle=0;  //init new attributes
-
+	m_nLineWidth = 1;
+	m_nLineAngle = 0;
+	m_nAlpha = 1.00;
+	m_ncolors[0] = 1.0;
+	m_ncolors[1] = 1.0;
+	m_ncolors[2] = 1.0;
+	m_StrokeDirection = SLIDER;
+	m_nAutoDrawSpace = 1;
+	m_nRandomSize = true;
 	// brush dialog definition
 	m_brushDialog = new Fl_Window(400, 325, "Brush Dialog");
 		// Add a brush type choice to the dialog
@@ -473,13 +698,13 @@ ImpressionistUI::ImpressionistUI() {
 		m_BrushTypeChoice->user_data((void*)(this));	// record self to be used by static callback functions
 		m_BrushTypeChoice->menu(brushTypeMenu);
 		m_BrushTypeChoice->callback(cb_brushChoice);
-    
-        //Add the stroke direction choice to the dialog
-        m_StrokeDirectionChoice = new Fl_Choice(125, 40, 150, 25, "&Stroke Direction");
-        m_StrokeDirectionChoice->user_data((void*)(this));
-        m_StrokeDirectionChoice->menu(strokeDirectionMenu);
-        m_StrokeDirectionChoice->callback(cb_strokeDirectionChoice);
-        m_StrokeDirectionChoice->deactivate();
+
+		//Add the stroke direction choice to the dialog
+		m_StrokeDirectionChoice = new Fl_Choice(125, 45, 150, 25, "&Stroke Direction");
+		m_StrokeDirectionChoice->user_data((void*)(this));
+		m_StrokeDirectionChoice->menu(strokeDirectionMenu);
+		m_StrokeDirectionChoice->callback(cb_strokeDirectionChoice);
+		m_StrokeDirectionChoice->deactivate();
 
 		m_ClearCanvasButton = new Fl_Button(240,10,150,25,"&Clear Canvas");
 		m_ClearCanvasButton->user_data((void*)(this));
@@ -498,35 +723,80 @@ ImpressionistUI::ImpressionistUI() {
 		m_BrushSizeSlider->value(m_nSize);
 		m_BrushSizeSlider->align(FL_ALIGN_RIGHT);
 		m_BrushSizeSlider->callback(cb_sizeSlides);
-    
-        //Add line width slider to the dialog
-        m_lineWidthSlider = new Fl_Value_Slider(10, 105, 300, 20, "Line Width");
-        m_lineWidthSlider->user_data((void*)(this));
-        m_lineWidthSlider->type(FL_HOR_NICE_SLIDER);
-        m_lineWidthSlider->labelfont(FL_COURIER);
-        m_lineWidthSlider->labelsize(12);
-        m_lineWidthSlider->minimum(1);
-        m_lineWidthSlider->maximum(40);
-        m_lineWidthSlider->step(1);
-        m_lineWidthSlider->value(m_lineWidth);
-        m_lineWidthSlider->align(FL_ALIGN_RIGHT);
-        m_lineWidthSlider->callback(cb_lineWidthSlides);
-        m_lineWidthSlider->deactivate();
-    
-        //Add line angle slider to the dialog
-        m_lineAngleSlider = new Fl_Value_Slider(10, 130, 300, 20, "Line Angle");
-        m_lineAngleSlider->user_data((void*)(this));
-        m_lineAngleSlider->type(FL_HOR_NICE_SLIDER);
-        m_lineAngleSlider->labelfont(FL_COURIER);
-        m_lineAngleSlider->labelsize(12);
-        m_lineAngleSlider->minimum(0);
-        m_lineAngleSlider->maximum(359);
-        m_lineAngleSlider->step(1);
-        m_lineAngleSlider->value(m_lineAngle);
-        m_lineAngleSlider->align(FL_ALIGN_RIGHT);
-        m_lineAngleSlider->callback(cb_lineAngleSlides);
-        m_lineAngleSlider->deactivate();
-    
-    m_brushDialog->end();	
 
+		// Add line width and angle slider to dialog
+		m_LineWidthSlider = new Fl_Value_Slider(10, 110, 300, 20, "Line Width");
+		m_LineWidthSlider->user_data((void*)(this));
+		m_LineWidthSlider->type(FL_HOR_NICE_SLIDER);
+		m_LineWidthSlider->labelfont(FL_COURIER);
+		m_LineWidthSlider->labelsize(12);
+		m_LineWidthSlider->minimum(1);
+		m_LineWidthSlider->maximum(40);
+		m_LineWidthSlider->step(1);
+		m_LineWidthSlider->value(m_nLineWidth);
+		m_LineWidthSlider->align(FL_ALIGN_RIGHT);
+		m_LineWidthSlider->callback(cb_lineWidthSlides);
+		m_LineWidthSlider->deactivate();
+
+		m_LineAngleSlider = new Fl_Value_Slider(10, 140, 300, 20, "Line Angle");
+		m_LineAngleSlider->user_data((void*)(this));
+		m_LineAngleSlider->type(FL_HOR_NICE_SLIDER);
+		m_LineAngleSlider->labelfont(FL_COURIER);
+		m_LineAngleSlider->labelsize(12);
+		m_LineAngleSlider->minimum(0);
+		m_LineAngleSlider->maximum(359);
+		m_LineAngleSlider->step(1);
+		m_LineAngleSlider->value(m_nLineAngle);
+		m_LineAngleSlider->align(FL_ALIGN_RIGHT);
+		m_LineAngleSlider->callback(cb_lineAngleSlides);
+		m_LineAngleSlider->deactivate();
+		
+		//add one slider for alpha
+		m_AlphaSlider = new Fl_Value_Slider(10, 170, 300, 20, "Alpha");
+		m_AlphaSlider->user_data((void*)(this));
+		m_AlphaSlider->type(FL_HOR_NICE_SLIDER);
+		m_AlphaSlider->labelfont(FL_COURIER);
+		m_AlphaSlider->labelsize(12);
+		m_AlphaSlider->minimum(0.00);
+		m_AlphaSlider->maximum(1.00);
+		m_AlphaSlider->step(0.01);
+		m_AlphaSlider->value(m_nAlpha);
+		m_AlphaSlider->align(FL_ALIGN_RIGHT);
+		m_AlphaSlider->callback(cb_alphaSlides);
+
+		//add one slider for auto draw space
+		m_AlphaSlider = new Fl_Value_Slider(10, 200, 140, 20, "Spacing");
+		m_AlphaSlider->user_data((void*)(this));
+		m_AlphaSlider->type(FL_HOR_NICE_SLIDER);
+		m_AlphaSlider->labelfont(FL_COURIER);
+		m_AlphaSlider->labelsize(12);
+		m_AlphaSlider->minimum(1);
+		m_AlphaSlider->maximum(16);
+		m_AlphaSlider->step(1);
+		m_AlphaSlider->value(m_nAutoDrawSpace);
+		m_AlphaSlider->align(FL_ALIGN_RIGHT);
+		m_AlphaSlider->callback(cb_autoDrawSpaceSlides);
+
+		//add a lighting button for random size
+		m_RandomSizeButton = new Fl_Light_Button(210, 200, 90, 20, "&Size Rand.");
+		m_RandomSizeButton->user_data((void*)(this));   // record self to be used by static callback functions
+		m_RandomSizeButton->callback(cb_randomSizeButton);
+		m_RandomSizeButton->set();
+
+		//add a button to auto draw
+		m_AutoDrawButton = new Fl_Button(310, 200, 50, 20, "&Paint");
+		m_AutoDrawButton->user_data((void*)(this));   // record self to be used by static callback functions
+		m_AutoDrawButton->callback(cb_autoDrawButton);
+		
+
+    m_brushDialog->end();
+
+
+	m_colorSelectionDialog = new Fl_Window(200, 200, "Color Selection");
+
+	m_colorChooser = new Fl_Color_Chooser(10, 20, 190,180, "Color Selection");
+	m_colorChooser->user_data((void*)(this));
+	m_colorChooser->callback(cb_color_selection);
+	m_colorChooser->rgb(1.0, 1.0, 1.0);
+	m_colorSelectionDialog->end();
 }

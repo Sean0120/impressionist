@@ -18,9 +18,17 @@ enum
 	BRUSH_SCATTERED_POINTS,
 	BRUSH_SCATTERED_LINES,
 	BRUSH_SCATTERED_CIRCLES,
+	BRUSH_BLUR,
+	BRUSH_SHARPENING,
 	NUM_BRUSH_TYPE // Make sure this stays at the end!
 };
-
+//  stroke direction control
+enum
+{
+	SLIDER = 0,
+	GRADIENT,
+	BRUSH_DIRECTION
+};
 
 class ImpressionistDoc; // Pre-declaring class
 
