@@ -287,6 +287,13 @@ int ImpressionistDoc::setMuralImage(char* iname) {
 
 }
 
+int	ImpressionistDoc::autoDraw()
+{
+    m_pUI->m_paintView->allowAutoDraw();
+	
+	return 0;
+}
+
 //------------------------------------------------------------------
 // Get the color of the pixel in the original image at coord x and y
 //------------------------------------------------------------------

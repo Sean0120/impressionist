@@ -11,6 +11,9 @@
 #include "ImpBrush.h"
 #include <iostream>
 #include <math.h>
+#include<cstdlib>
+#include<ctime>
+
 using namespace std;
 
 #define LEFT_MOUSE_DOWN		1
@@ -39,7 +42,8 @@ PaintView::PaintView(int			x,
 {
 	m_nWindowWidth = w;
 	m_nWindowHeight = h;
-
+    
+    isAutoDraw=false;//for auto draw
 }
 
 
@@ -230,6 +234,13 @@ void PaintView::draw()
 			break;
 		}
 	}
+    
+    //Check if allow auto draw
+    if(allowAutoDraw==true)
+    {
+        SaveUndoPainting();
+        autoDraw();
+    }
 
 	glFlush();
 
@@ -357,3 +368,44 @@ void PaintView::SaveUndoPainting() {
 	memcpy(m_pDoc->m_ucUndoPainting, m_pDoc->m_ucPainting,buffer_size);
 	
 }
+
+//for auto draw
+void PaintView::allowAutoDraw()
+{
+    isAutoDraw=true;
+    draw();
+    isAutoDraw=false;
+}
+
+
+void PaintView::autoDraw()
+{
+    bool randomSize=m_pUI->getRandomSize();
+    int space=m_pUI->getAutoDrawSpace();
+    int ori_Size=m_pUI->getSize();
+    srand((unsigned)time(NULL));
+    for(int i=0;i<m_nDrawWidth/space+1;i++)
+    {
+        for(int j=0;j<m_nDrawHeight/space+1;j++)
+        {
+            Point current_Source(space*i+m_nStartCol, space*j-m_nWindowHeight+m_nStartRow);
+            Point current_Target(space*i, space*j);
+            if(randomSize==true)
+            {
+                m_pUI->setSize(rand()%(ori_Size)+1);
+            }
+            m_pDoc->m_pCurrentBrush->BrushBegin( current_Source, current_Target );
+        }
+    }
+    
+    m_pUI->setSize(ori_Size);
+    
+}
+
+
+
+
+
+
+
+

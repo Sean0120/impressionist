@@ -44,6 +44,11 @@ public:
 	Fl_Slider*			m_LineAngleSlider;
 	Fl_Slider*			m_AlphaSlider;
 	Fl_Choice*          m_StrokeDirectionChoice;    //new choice
+
+	Fl_Slider*			m_AutoDrawSpaceSlider;	//for auto draw
+	Fl_Light_Button*	m_RandomSizeButton;
+	Fl_Button*			m_AutoDrawButton;
+
 	//for color selection dialog
 	Fl_Window*			m_colorSelectionDialog;
 	Fl_Color_Chooser*   m_colorChooser;
@@ -80,6 +85,13 @@ public:
 	int                 getStrokeDirection();
 	void                setStrokeDirection(int direction);
 
+	//for auto draw
+	int					getAutoDrawSpace();
+	void				setAutoDrawSpace(int space);
+	bool				getRandomSize();
+	void				setRandomSize(bool isRandom);
+
+
 private:
 	ImpressionistDoc*	m_pDoc;		// pointer to document to communicate with the document
 
@@ -90,6 +102,9 @@ private:
 	float   m_nAlpha;
 	float   m_ncolors[3];
 	int     m_StrokeDirection;  //type of direction
+	int		m_nAutoDrawSpace;	//Auto draw space
+	bool	m_nRandomSize;
+
 	// Static class members
 	static Fl_Menu_Item		menuitems[];
 	static Fl_Menu_Item		brushTypeMenu[NUM_BRUSH_TYPE+1];
@@ -115,6 +130,11 @@ private:
 	static void cb_lineAngleSlides(Fl_Widget * o, void * v);
 	static void cb_alphaSlides(Fl_Widget * o, void * v);
 	static void cb_strokeDirectionChoice(Fl_Widget* o, void* v);//new callback for new choice
+
+	static void cb_autoDrawSpaceSlides(Fl_Widget* o, void* v);	//Callback functions for auto draw
+	static void cb_randomSizeButton(Fl_Widget* o, void* v);
+	static void cb_autoDrawButton(Fl_Widget* o, void* v);
+
 	//add some new helper function here for "file" in menu bar
 	// the prototype may be wrong
 	static void	cb_colors(Fl_Menu_* o, void* v);
