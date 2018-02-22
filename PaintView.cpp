@@ -236,7 +236,7 @@ void PaintView::draw()
 	}
     
     //Check if allow auto draw
-    if(allowAutoDraw==true)
+    if(isAutoDraw==true)
     {
         SaveUndoPainting();
         autoDraw();
