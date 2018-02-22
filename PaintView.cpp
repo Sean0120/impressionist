@@ -245,7 +245,7 @@ int PaintView::handle(int event)
 {
 	coord.x = Fl::event_x();
 	coord.y = Fl::event_y();
-	Point marker(coord.x + m_nStartCol, m_nEndRow - coord.y);
+	Point marker(coord.x, m_nWindowHeight - coord.y);
 
 	switch(event)
 	{
