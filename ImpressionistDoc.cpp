@@ -150,6 +150,9 @@ int ImpressionistDoc::loadImage(char *iname)
 	m_ucPainting	= new unsigned char [width*height*3];
 	memset(m_ucPainting, 0, width*height*3);
 
+	m_ucUndoPainting = new unsigned char[width*height * 3];
+	memset(m_ucUndoPainting, 0, width*height * 3);
+
 	m_pUI->m_mainWindow->resize(m_pUI->m_mainWindow->x(), 
 								m_pUI->m_mainWindow->y(), 
 								width*2, 
@@ -188,7 +191,7 @@ int ImpressionistDoc::saveImage(char *iname)
 //-----------------------------------------------------------------
 int ImpressionistDoc::clearCanvas() 
 {
-	if (m_ucUndoPainting) delete[] m_ucUndoPainting;
+//	if (m_ucUndoPainting) delete[] m_ucUndoPainting;
 	// Release old storage
 	if ( m_ucPainting ) 
 	{
