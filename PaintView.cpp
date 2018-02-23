@@ -197,31 +197,7 @@ void PaintView::draw()
 
 
 			break;
-		case RIGHT_MOUSE_DRAG:
-			if (m_pDoc->getStrokeDirection() == SLIDER) {
-				RestoreContent();
 
-				rightMouseEnd = target;
-
-				glBegin(GL_LINES);
-
-				glColor3f(1, 0, 0);
-				glVertex2d(rightMouseStart.x, rightMouseStart.y);
-				glVertex2d(rightMouseEnd.x, rightMouseEnd.y);
-				glEnd();
-			}   //draw a red line from rightMouseStart to rightMouseEnd and set the line angle in UI
-
-
-				glBegin(GL_LINES);
-
-				glColor3f(1, 0, 0);
-				glVertex2d(rightMouseStart.x, rightMouseStart.y);
-				glVertex2d(rightMouseEnd.x, rightMouseEnd.y);
-				glEnd();
-			}   //draw a red line from rightMouseStart to rightMouseEnd and set the line angle in UI
-
-
-			break;
 		case RIGHT_MOUSE_UP:
 			if (m_pDoc->getStrokeDirection() == SLIDER) {
 				rightMouseEnd = target;
@@ -272,7 +248,7 @@ void PaintView::draw()
     }
 	if (m_pUI->m_nAlphaOfBackground != 0) {
 		switchToDim();
-		glDrawBuffer(GL_BACK);
+		//glDrawBuffer(GL_BACK);
 		glRasterPos2i(0, m_nWindowHeight - drawHeight);
 		glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
 		glPixelStorei(GL_UNPACK_ROW_LENGTH, m_pDoc->m_nWidth);
@@ -501,29 +477,36 @@ void PaintView::autoDraw()
 	
 	*/
 }
+float old_alpha = 0;
 //To calculate the dim version
 void PaintView::switchToDim() {
 
 	float Alpha = m_pUI->m_nAlphaOfBackground;
-	for (int i = 0; i < m_pDoc->m_nHeight *m_pDoc->m_nWidth * 3; ++i) {
-		if (m_pDoc->m_ucPainting[i] == 0) {
+	for (int i = 0; i < m_pDoc->m_nHeight *m_pDoc->m_nWidth * 3 ; i = i + 3) {
+		bool judgement1 = (int(old_alpha*m_pDoc->m_ucBitmap[i]) == m_pDoc->m_ucPainting[i]);
+		bool judgement2 = (int(old_alpha*m_pDoc->m_ucBitmap[i+1]) == m_pDoc->m_ucPainting[i+1]);
+		bool judgement3 = (int(old_alpha*m_pDoc->m_ucBitmap[i+2]) == m_pDoc->m_ucPainting[i+2]);
+		if (judgement1 && judgement2 && judgement3) {
 			m_pDoc->m_ucPaintingWithDim[i] = Alpha * m_pDoc->m_ucBitmap[i];
-
+			m_pDoc->m_ucPaintingWithDim[i+1] = Alpha * m_pDoc->m_ucBitmap[i+1];
+			m_pDoc->m_ucPaintingWithDim[i+2] = Alpha * m_pDoc->m_ucBitmap[i+2];
 
 		}
 		else
 		{
 			m_pDoc->m_ucPaintingWithDim[i] = m_pDoc->m_ucPainting[i];
+			m_pDoc->m_ucPaintingWithDim[i+1] = m_pDoc->m_ucPainting[i+1];
+			m_pDoc->m_ucPaintingWithDim[i+2] = m_pDoc->m_ucPainting[i+2];
 		}
 	}
-	/*
-	if (m_pUI->m_nInDim) {
+	
+	if (Alpha > 0.0) {
 	unsigned char* temp = m_pDoc->m_ucPaintingWithDim;
 	m_pDoc->m_ucPaintingWithDim = m_pDoc->m_ucPainting;
 	m_pDoc->m_ucPainting = temp;
 	}
 	m_pUI->m_paintView->refresh();
-	*/
+	old_alpha = Alpha;
 }
 
 
