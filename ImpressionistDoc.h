@@ -35,7 +35,10 @@ public:
 	int     getStrokeDirection();           //get the stroke direction
 	int		setMuralImage(char* iname);		//the function for New Mural Image
 	int		autoDraw();						//Auto draw
+	int		applyKernel();					//apply kernel on the current paintview
 
+	int		loadGradientImage(char* iname);	//load gradient image
+	bool    getAnotherGradient();           //get Another gradient
 // Attributes
 public:
 	// Dimensions of original window.
@@ -49,7 +52,11 @@ public:
 	unsigned char*	m_ucPainting;
 	//Bitmaps for undo paiting
 	unsigned char*  m_ucUndoPainting;
+	//Bitmaps for background
+	unsigned char* m_ucPaintingWithDim;
 
+	//Bitmap for gradient image
+	unsigned char* m_ucGradientImage;
 	// The current active brush.
 	ImpBrush*			m_pCurrentBrush;	
 	// Size of the brush.
@@ -63,10 +70,17 @@ public:
 	GLubyte* GetOriginalPixel( int x, int y );   
 	// Get the color of the original picture at the specified point	
 	GLubyte* GetOriginalPixel( const Point p );  
+	void SetPaintPixel(int x, int y, const GLubyte* color);
+	GLubyte* GetOriginalPixelBlack(const Point p);// if the point is out of the image, set the color to black
+
 	// Helper function to compute the gradient
 	int getGx(const Point p);
 	int getGy(const Point p);
 
+	//Helper function for another gradient
+	GLubyte* GetGradientPixel(int x, int y);
+	int getAnotherGx(const Point p);
+	int getAnotherGy(const Point p);
 
 private:
 	char			m_imageName[256];

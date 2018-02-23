@@ -52,7 +52,7 @@ void ScatteredLineBrush::BrushMove(const Point source, const Point target)
 			glEnd();
 		}
 	}
-	else if (pDoc->getStrokeDirection() == GRADIENT) {
+	else if (pDoc->getStrokeDirection() == GRADIENT&&pDoc->getAnotherGradient() == false) {
 		for (int i = 0; i < 4; ++i) {
 			int position_x = rand() % size - size / 2;
 			int position_y = rand() % size - size / 2;

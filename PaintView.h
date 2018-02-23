@@ -35,14 +35,18 @@ public:
 
 	
 
-	Point rightMouseStart, rightMouseEnd;	//for right mouse use
-	Point leftMouseStart, leftMouseEnd;
     
     void allowAutoDraw();    //for auto draw
     bool isAutoDraw;
     void autoDraw();
     
+	void switchToDim();
+
+	Point rightMouseStart, rightMouseEnd;	//for right mouse use
+	Point leftMouseStart, leftMouseEnd;
+
 private:
+	GLvoid* m_pDimBitstart;
 	GLvoid* m_pPaintBitstart;
 	int		m_nDrawWidth,
 			m_nDrawHeight,

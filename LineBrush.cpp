@@ -47,11 +47,19 @@ void LineBrush::BrushMove( const Point source, const Point target )
 		glVertex2d(target.x + size / 2 * cos(2 * Pi*angle / 360), target.y + size / 2 * sin(2 * Pi*angle / 360));
 
 	}
-	else if (pDoc->getStrokeDirection() == GRADIENT) {
+	else if (pDoc->getStrokeDirection() == GRADIENT && (pDoc->getAnotherGradient() == false)) {
 		int Gx = pDoc->getGx(source);
 		int Gy = pDoc->getGy(source);
 		double cosAngle = Gy / sqrt(Gx*Gx + Gy*Gy);
 		double sinAngle = -Gx / sqrt(Gx*Gx + Gy*Gy);
+		glVertex2d(target.x - size / 2 * cosAngle, target.y - size / 2 * sinAngle);
+		glVertex2d(target.x + size / 2 * cosAngle, target.y + size / 2 * sinAngle);
+	}
+	else if ((pDoc->getStrokeDirection() == GRADIENT) && (pDoc->getAnotherGradient() == true)) {
+		int Gx = pDoc->getAnotherGx(source);
+		int Gy = pDoc->getAnotherGy(source);
+		double cosAngle = -Gy / sqrt(Gx*Gx + Gy*Gy);
+		double sinAngle = Gx / sqrt(Gx*Gx + Gy*Gy);
 		glVertex2d(target.x - size / 2 * cosAngle, target.y - size / 2 * sinAngle);
 		glVertex2d(target.x + size / 2 * cosAngle, target.y + size / 2 * sinAngle);
 	}

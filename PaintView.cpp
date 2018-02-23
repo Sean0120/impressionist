@@ -13,7 +13,8 @@
 #include <math.h>
 #include<cstdlib>
 #include<ctime>
-
+#include<vector>
+#include<algorithm>
 using namespace std;
 
 #define LEFT_MOUSE_DOWN		1
@@ -87,6 +88,9 @@ void PaintView::draw()
 
 	m_pPaintBitstart = m_pDoc->m_ucPainting + 
 		3 * ((m_pDoc->m_nPaintWidth * startrow) + scrollpos.x);
+	m_pDimBitstart = m_pDoc->m_ucPaintingWithDim +
+		3 * ((m_pDoc->m_nPaintWidth * (startrow)) + scrollpos.x);
+
 
 	m_nDrawWidth	= drawWidth;
 	m_nDrawHeight	= drawHeight;
@@ -96,14 +100,17 @@ void PaintView::draw()
 	m_nStartCol		= scrollpos.x;
 	m_nEndCol		= m_nStartCol + drawWidth;
 
-	if ( m_pDoc->m_ucPainting && !isAnEvent) 
+	if ( m_pDoc->m_ucPainting && !isAnEvent)
 	{
 		RestoreContent();
 
 	}
+		
 
 	if ( m_pDoc->m_ucPainting && isAnEvent) 
 	{
+
+
 
 		// Clear it after processing.
 		isAnEvent	= 0;	
@@ -124,6 +131,10 @@ void PaintView::draw()
 			}
 			SaveUndoPainting();
 			m_pDoc->m_pCurrentBrush->BrushBegin( source, target );
+
+			SaveCurrentContent();
+			RestoreContent();
+
 			break;
 		case LEFT_MOUSE_DRAG:
 			if (source.x > m_nDrawWidth || source.y < 0)
@@ -164,12 +175,18 @@ void PaintView::draw()
 				break;
 			}
 			m_pDoc->m_pCurrentBrush->BrushMove( source, target );
-			break;
-		case LEFT_MOUSE_UP:
-			m_pDoc->m_pCurrentBrush->BrushEnd( source, target );
+
 
 			SaveCurrentContent();
 			RestoreContent();
+
+
+			break;
+		case LEFT_MOUSE_UP:
+			m_pDoc->m_pCurrentBrush->BrushEnd( source, target );
+			SaveCurrentContent();
+			RestoreContent();
+		
 			break;
 		case RIGHT_MOUSE_DOWN:
 			if (m_pDoc->getStrokeDirection() == SLIDER) {
@@ -238,11 +255,22 @@ void PaintView::draw()
     //Check if allow auto draw
     if(isAutoDraw==true)
     {
-        SaveUndoPainting();
+        //SaveUndoPainting();
         autoDraw();
+		
+		isAutoDraw = false;
+		
     }
-
+	if (m_pUI->m_nAlphaOfBackground != 0) {
+		switchToDim();
+		//glDrawBuffer(GL_BACK);
+		glRasterPos2i(0, m_nWindowHeight - drawHeight);
+		glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+		glPixelStorei(GL_UNPACK_ROW_LENGTH, m_pDoc->m_nWidth);
+		glDrawPixels(drawWidth, drawHeight, GL_RGB, GL_UNSIGNED_BYTE, m_pDimBitstart);
+	}
 	glFlush();
+
 
 	#ifndef MESA
 	// To avoid flicker on some machines.
@@ -256,7 +284,7 @@ int PaintView::handle(int event)
 {
 	coord.x = Fl::event_x();
 	coord.y = Fl::event_y();
-	Point marker(coord.x + m_nStartCol, m_nEndRow - coord.y);
+	Point marker(coord.x, m_nWindowHeight - coord.y);
 
 	switch(event)
 	{
@@ -362,7 +390,7 @@ void PaintView::RestoreContent()
 }
 
 void PaintView::SaveUndoPainting() {
-	delete[] m_pDoc->m_ucUndoPainting;
+	if(m_pDoc->m_ucUndoPainting) delete[] m_pDoc->m_ucUndoPainting;
 	int buffer_size = m_pDoc->m_nPaintWidth*m_pDoc->m_nPaintHeight * 3;
 	m_pDoc->m_ucUndoPainting = new unsigned char[buffer_size];
 	memcpy(m_pDoc->m_ucUndoPainting, m_pDoc->m_ucPainting,buffer_size);
@@ -373,13 +401,74 @@ void PaintView::SaveUndoPainting() {
 void PaintView::allowAutoDraw()
 {
     isAutoDraw=true;
-    draw();
-    isAutoDraw=false;
+	redraw();
 }
 
 
 void PaintView::autoDraw()
 {
+	
+	
+	srand(time(NULL));
+	vector<int> index;
+	int spacing = m_pUI->getAutoDrawSpace();
+	int height = m_pDoc->m_nHeight;
+	int width = m_pDoc->m_nWidth;
+
+	ImpBrush* currentBrush = m_pDoc->m_pCurrentBrush;
+
+	//randAttr part
+	bool randAttr = m_pUI->getRandomSize();
+	int size = m_pUI->getSize();
+	int lineWidth = m_pUI->getLineWidth();
+	int lineAngle = m_pUI->getLineAngle();
+	
+	//calculate how many points there are 
+	int xTimes = width / spacing;
+	int yTimes = height / spacing+1;
+
+	for (int i = 0; i < xTimes*yTimes; i++)
+		index.push_back(i);
+	random_shuffle(index.begin(), index.end());
+	//the start y is not zero
+	int offset = m_nWindowHeight - m_nDrawHeight;
+	int startX = spacing / 2;
+	int startY = spacing / 2 + offset;
+	//start point is the left down corner
+
+	for (int i = 0; i < index.size(); i++) {
+		int position = index.at(i);
+		int x = startX + (position % xTimes)*spacing;
+		int y = startY + (position / xTimes)*spacing;
+		Point target(x, y);
+		if (randAttr) {
+			m_pUI->setSize(size + rand() % 10 - 5);
+			m_pUI->setLineAngle(lineAngle + rand() % 90 - 45);
+			m_pUI->setLineWidth(lineWidth + rand() % 10 - 5);
+		}
+		currentBrush->BrushBegin(target, target);
+		currentBrush->BrushEnd(target, target);
+		
+	}
+	
+	//set back to origin
+	m_pUI->setSize(size);
+	m_pUI->setLineAngle(lineAngle);
+	m_pUI->setLineWidth(lineWidth);
+	//save the current content
+	glPixelStorei(GL_PACK_ALIGNMENT, 1);
+	glPixelStorei(GL_PACK_ROW_LENGTH, m_pDoc->m_nPaintWidth);
+
+	glReadPixels(0,
+		m_nWindowHeight - m_nDrawHeight,
+		m_nDrawWidth,
+		m_nDrawHeight,
+		GL_RGB,
+		GL_UNSIGNED_BYTE,
+		m_pPaintBitstart);
+
+
+	/*
     bool randomSize=m_pUI->getRandomSize();
     int space=m_pUI->getAutoDrawSpace();
     int ori_Size=m_pUI->getSize();
@@ -397,11 +486,43 @@ void PaintView::autoDraw()
             m_pDoc->m_pCurrentBrush->BrushBegin( current_Source, current_Target );
         }
     }
-    
+	
+	
     m_pUI->setSize(ori_Size);
-    
+	
+	*/
 }
+float old_alpha = 0;
+//To calculate the dim version
+void PaintView::switchToDim() {
 
+	float Alpha = m_pUI->m_nAlphaOfBackground;
+	for (int i = 0; i < m_pDoc->m_nHeight *m_pDoc->m_nWidth * 3 ; i = i + 3) {
+		bool judgement1 = (int(old_alpha*m_pDoc->m_ucBitmap[i]) == m_pDoc->m_ucPainting[i]);
+		bool judgement2 = (int(old_alpha*m_pDoc->m_ucBitmap[i+1]) == m_pDoc->m_ucPainting[i+1]);
+		bool judgement3 = (int(old_alpha*m_pDoc->m_ucBitmap[i+2]) == m_pDoc->m_ucPainting[i+2]);
+		if (judgement1 && judgement2 && judgement3) {
+			m_pDoc->m_ucPaintingWithDim[i] = Alpha * m_pDoc->m_ucBitmap[i];
+			m_pDoc->m_ucPaintingWithDim[i+1] = Alpha * m_pDoc->m_ucBitmap[i+1];
+			m_pDoc->m_ucPaintingWithDim[i+2] = Alpha * m_pDoc->m_ucBitmap[i+2];
+
+		}
+		else
+		{
+			m_pDoc->m_ucPaintingWithDim[i] = m_pDoc->m_ucPainting[i];
+			m_pDoc->m_ucPaintingWithDim[i+1] = m_pDoc->m_ucPainting[i+1];
+			m_pDoc->m_ucPaintingWithDim[i+2] = m_pDoc->m_ucPainting[i+2];
+		}
+	}
+	
+	if (Alpha > 0.0) {
+	unsigned char* temp = m_pDoc->m_ucPaintingWithDim;
+	m_pDoc->m_ucPaintingWithDim = m_pDoc->m_ucPainting;
+	m_pDoc->m_ucPainting = temp;
+	}
+	m_pUI->m_paintView->refresh();
+	old_alpha = Alpha;
+}
 
 
 
