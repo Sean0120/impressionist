@@ -22,6 +22,7 @@
 #include "BlurBrush.h"
 #include "SharpeningBrush.h"
 #include "WarpBrush.h"
+#include "EraserBrush.h"
 #include <iostream>
 using namespace std;
 #define DESTROY(p)	{  if ((p)!=NULL) {delete [] p; p=NULL; } }
@@ -67,6 +68,11 @@ ImpressionistDoc::ImpressionistDoc()
 	//warp brush
 	ImpBrush::c_pBrushes[BRUSH_WARP]
 		= new WarpBrush(this, "warp");
+
+	//Eraser
+	ImpBrush::c_pBrushes[BRUSH_ERASER]
+		= new EraserBrush(this, "warp");
+
 	// make one of the brushes current
 	m_pCurrentBrush	= ImpBrush::c_pBrushes[0];
 
