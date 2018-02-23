@@ -466,7 +466,14 @@ void ImpressionistUI::cb_executeKernel(Fl_Widget* o, void* v) {
 	pDoc->applyKernel();
 	
 }
+void ImpressionistUI::cb_edge_threshold(Fl_Widget* o, void * v) {
+	((ImpressionistUI*)(o->user_data()))->m_nEgdeThreshold = int(((Fl_Slider *)o)->value());
 
+};
+void ImpressionistUI::cb_paint_edge(Fl_Widget* o, void * v) {
+	ImpressionistDoc * pDoc = ((ImpressionistUI*)(o->user_data()))->getDocument();
+	pDoc->drawEdge();
+};
 //------------------------------
 //some new functions wothout implementation 
 //TODO:
@@ -776,6 +783,7 @@ ImpressionistUI::ImpressionistUI() {
 	m_KernelInputDialog = NULL;
 	m_Normalized = NULL;
 	m_Applykernel = NULL;
+	m_nEgdeThreshold = 50;
 	// brush dialog definition
 	m_brushDialog = new Fl_Window(400, 325, "Brush Dialog");
 		// Add a brush type choice to the dialog
@@ -872,8 +880,24 @@ ImpressionistUI::ImpressionistUI() {
 		m_AutoDrawButton = new Fl_Button(310, 200, 50, 20, "&Paint");
 		m_AutoDrawButton->user_data((void*)(this));   // record self to be used by static callback functions
 		m_AutoDrawButton->callback(cb_autoDrawButton);
-		
 
+		////add a slider for edge threshold
+		m_ThresholdSlider = new Fl_Value_Slider(10, 230, 200, 20, "Threshold");
+		m_ThresholdSlider ->user_data((void*)(this));
+		m_ThresholdSlider ->type(FL_HOR_NICE_SLIDER);
+		m_ThresholdSlider ->labelfont(FL_COURIER);
+		m_ThresholdSlider ->labelsize(12);
+		m_ThresholdSlider ->minimum(1);
+		m_ThresholdSlider ->maximum(500);
+		m_ThresholdSlider ->step(1);
+		m_ThresholdSlider ->value(m_nEgdeThreshold);
+		m_ThresholdSlider ->align(FL_ALIGN_RIGHT);
+		m_ThresholdSlider ->callback(cb_edge_threshold);
+
+		////add a button 
+		m_AutoDrawButton = new Fl_Button(310, 230, 50, 20, "&Edge Paint");
+		m_AutoDrawButton->user_data((void*)(this));   // record self to be used by static callback functions
+		m_AutoDrawButton->callback(cb_paint_edge);
     m_brushDialog->end();
 
 

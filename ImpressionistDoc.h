@@ -36,6 +36,7 @@ public:
 	int		setMuralImage(char* iname);		//the function for New Mural Image
 	int		autoDraw();						//Auto draw
 	int		applyKernel();					//apply kernel on the current paintview
+	void	drawEdge();						//draw the edges
 // Attributes
 public:
 	// Dimensions of original window.

@@ -57,7 +57,9 @@ public:
 	Fl_Slider*			m_AutoDrawSpaceSlider;	//for auto draw
 	Fl_Light_Button*	m_RandomSizeButton;
 	Fl_Button*			m_AutoDrawButton;
-
+	//for edge draw
+	Fl_Slider*			m_ThresholdSlider;
+	Fl_Button*			m_EdgeButton;
 	//the setting of kernel dialog
 	Fl_Window*			m_KernelSettingDialog;
 	Fl_Int_Input*		m_NumOfRowsInput;
@@ -72,7 +74,7 @@ public:
 	int		m_nKernelWidth;
 	int		m_nKernelHeight;
 	bool	m_nNormalized;
-
+	
 	// Member functions
 	void				setDocument(ImpressionistDoc* doc);
 	ImpressionistDoc*	getDocument();
@@ -85,6 +87,7 @@ public:
 	int					getSize();
 	void				setSize(int size);
 
+	int					m_nEgdeThreshold;
 	
 	//for auto draw
 	int					getAutoDrawSpace();
@@ -179,6 +182,9 @@ private:
 	static void cb_kernel_apply(Fl_Widget* o, void* v);
 	static void cb_normalize_button(Fl_Widget* o, void* v);
 	static void cb_executeKernel(Fl_Widget* o, void* v);
+	//edge detector
+	static void cb_edge_threshold(Fl_Widget* o, void * v);
+	static void cb_paint_edge(Fl_Widget* o, void * v);
 };
 
 #endif

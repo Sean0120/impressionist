@@ -373,12 +373,36 @@ int	ImpressionistDoc::applyKernel()
 
 		}
 	}
-	cout << "dd" << endl;
+	
 	m_pUI->m_paintView->refresh();
 	return 1;
 }
 
+void	ImpressionistDoc::drawEdge() {
+	//draw the edge
+	GLubyte color[3];
+	for (int i = 0; i < m_nPaintHeight * m_nPaintWidth; ++i) {
+		//check whether this point is valid
+		Point target(i%m_nPaintWidth, i / m_nPaintWidth);
+		int Gradient_x = getGx(target);
+		int Gradient_y = getGy(target);
+		float Gradient = sqrt(Gradient_x*Gradient_x + Gradient_y*Gradient_y);
+		if (Gradient > m_pUI->m_nEgdeThreshold) {
+			m_ucPainting[3 * i] = 255;
+			m_ucPainting[3 * i + 1] =255;
+			m_ucPainting[3 * i + 2] = 255;
+		}
+		else
+		{
+			m_ucPainting[3 * i] = 0;
+			m_ucPainting[3 * i + 1] = 0;
+			m_ucPainting[3 * i + 2] = 0;
+		}
+	}
 
+	m_pUI->m_paintView->refresh();
+	
+}
 
 
 
@@ -440,3 +464,4 @@ int ImpressionistDoc::getGy(const Point p)
 		(*(GetOriginalPixel(p.x - 1, p.y + 1)) - *(GetOriginalPixel(p.x - 1, p.y - 1))) +
 		2 * (*(GetOriginalPixel(p.x, p.y + 1)) - *(GetOriginalPixel(p.x, p.y - 1)));
 }
+
