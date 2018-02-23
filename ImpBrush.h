@@ -21,7 +21,9 @@ enum
 	BRUSH_BLUR,
 	BRUSH_SHARPENING,
 	BRUSH_WARP,
+
 	BRUSH_ERASER,
+
 	NUM_BRUSH_TYPE // Make sure this stays at the end!
 };
 //  stroke direction control
@@ -74,3 +76,4 @@ private:
 };
 
 #endif
+

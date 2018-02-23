@@ -22,7 +22,9 @@
 #include "BlurBrush.h"
 #include "SharpeningBrush.h"
 #include "WarpBrush.h"
+
 #include "EraserBrush.h"
+
 #include <iostream>
 using namespace std;
 #define DESTROY(p)	{  if ((p)!=NULL) {delete [] p; p=NULL; } }
@@ -38,6 +40,8 @@ ImpressionistDoc::ImpressionistDoc()
 	m_ucPainting	= NULL;
 	m_ucUndoPainting = NULL;
 	m_ucPaintingWithDim = NULL;
+
+	m_ucGradientImage = NULL;
 
 
 
@@ -69,9 +73,11 @@ ImpressionistDoc::ImpressionistDoc()
 	ImpBrush::c_pBrushes[BRUSH_WARP]
 		= new WarpBrush(this, "warp");
 
+
 	//Eraser
 	ImpBrush::c_pBrushes[BRUSH_ERASER]
 		= new EraserBrush(this, "warp");
+
 
 	// make one of the brushes current
 	m_pCurrentBrush	= ImpBrush::c_pBrushes[0];
@@ -131,6 +137,11 @@ int ImpressionistDoc::getStrokeDirection()
 	return m_pUI->getStrokeDirection();
 }
 
+//get another gradient
+bool ImpressionistDoc::getAnotherGradient()
+{
+	return m_pUI->getAnotherGradient();
+}
 //---------------------------------------------------------
 // Load the specified image
 // This is called by the UI when the load image button is 
@@ -160,6 +171,10 @@ int ImpressionistDoc::loadImage(char *iname)
 	if ( m_ucPainting ) delete [] m_ucPainting;
 	if (m_ucUndoPainting) delete[] m_ucUndoPainting;
 	if (m_ucPaintingWithDim) delete[] m_ucPaintingWithDim;
+
+	if (m_ucGradientImage)	delete[] m_ucGradientImage;
+
+
 
 	m_ucBitmap		= data;
 
@@ -237,6 +252,15 @@ int ImpressionistDoc::clearCanvas()
 
 		// refresh paint view as well	
 		m_pUI->m_paintView->refresh();
+	}
+
+	if (m_ucGradientImage)
+	{
+		delete[] m_ucUndoPainting;
+		m_ucUndoPainting = new unsigned char[m_nPaintWidth*m_nPaintHeight * 3];
+		memset(m_ucUndoPainting, 0, m_nPaintWidth*m_nPaintHeight * 3);
+
+
 	}
 	
 	return 0;
@@ -324,6 +348,31 @@ int ImpressionistDoc::setMuralImage(char* iname) {
 
 }
 
+
+int ImpressionistDoc::loadGradientImage(char* iname)
+{
+	unsigned char*	data;
+	int				width,
+		height;
+
+	if ((data = readBMP(iname, width, height)) == NULL)
+	{
+		fl_alert("Can't load bitmap file");
+		return 0;
+	}
+	// reflect the fact of loading the new image
+	if (m_nWidth != width || m_nPaintWidth != width || m_nHeight != height) {
+		fl_alert("Dimension is different from the previous one");
+		return 0;
+	}
+
+	//	release old storage
+	if (m_ucGradientImage)	delete[] m_ucGradientImage;
+	m_ucGradientImage = data;
+
+	return 1;
+}
+
 int	ImpressionistDoc::autoDraw()
 {
     m_pUI->m_paintView->allowAutoDraw();
@@ -379,10 +428,13 @@ int	ImpressionistDoc::applyKernel()
 
 		}
 	}
+
 	
+
 	m_pUI->m_paintView->refresh();
 	return 1;
 }
+
 
 void	ImpressionistDoc::drawEdge() {
 	//draw the edge
@@ -409,6 +461,7 @@ void	ImpressionistDoc::drawEdge() {
 	m_pUI->m_paintView->refresh();
 	
 }
+
 
 
 
@@ -469,5 +522,36 @@ int ImpressionistDoc::getGy(const Point p)
 	return (*(GetOriginalPixel(p.x + 1, p.y + 1)) - *(GetOriginalPixel(p.x + 1, p.y - 1))) +
 		(*(GetOriginalPixel(p.x - 1, p.y + 1)) - *(GetOriginalPixel(p.x - 1, p.y - 1))) +
 		2 * (*(GetOriginalPixel(p.x, p.y + 1)) - *(GetOriginalPixel(p.x, p.y - 1)));
+
 }
+
+GLubyte* ImpressionistDoc::GetGradientPixel(int x, int y)
+{
+	if (x < 0)
+		x = 0;
+	else if (x >= m_nWidth)
+		x = m_nWidth - 1;
+
+	if (y < 0)
+		y = 0;
+	else if (y >= m_nHeight)
+		y = m_nHeight - 1;
+
+	return (GLubyte*)(m_ucGradientImage + 3 * (y*m_nWidth + x));
+}
+
+int ImpressionistDoc::getAnotherGx(const Point p)
+{
+	return (*(GetGradientPixel(p.x + 1, p.y + 1)) - *(GetGradientPixel(p.x - 1, p.y + 1))) +
+		(*(GetGradientPixel(p.x + 1, p.y - 1)) - *(GetGradientPixel(p.x - 1, p.y - 1))) +
+		2 * (*(GetGradientPixel(p.x + 1, p.y)) - *(GetGradientPixel(p.x - 1, p.y)));
+}
+
+int ImpressionistDoc::getAnotherGy(const Point p)
+{
+	return (*(GetGradientPixel(p.x + 1, p.y + 1)) - *(GetGradientPixel(p.x + 1, p.y - 1))) +
+		(*(GetGradientPixel(p.x - 1, p.y + 1)) - *(GetGradientPixel(p.x - 1, p.y - 1))) +
+		2 * (*(GetGradientPixel(p.x, p.y + 1)) - *(GetGradientPixel(p.x, p.y - 1)));
+}
+
 

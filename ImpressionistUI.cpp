@@ -255,6 +255,17 @@ void ImpressionistUI::cb_exit(Fl_Menu_* o, void* v)
 
 }
 
+//new bonus: load a gradient image
+void ImpressionistUI::cb_load_gradient_image(Fl_Menu_* o, void* v)
+{
+	ImpressionistDoc *pDoc = whoami(o)->getDocument();
+
+	char* newfile = fl_file_chooser("Open File?", "*.bmp", pDoc->getImageName());
+	if (newfile != NULL) {
+		pDoc->loadGradientImage(newfile);
+	}
+}
+
 //function for switching the view 
 void ImpressionistUI::cb_switch_view(Fl_Menu_* o, void* v) {
 	ImpressionistDoc* pDoc = whoami(o)->getDocument();
@@ -296,17 +307,20 @@ void ImpressionistUI::cb_brushChoice(Fl_Widget* o, void* v)
 	ImpressionistDoc* pDoc=pUI->getDocument();
 
 	int type=(int)v;
+	pUI->m_nCurrentBrush = type;
 	//  Activate the sliders and choice when it is line brush
 	if (type == BRUSH_LINES || type == BRUSH_SCATTERED_LINES)
 	{
 		pUI->m_LineWidthSlider->activate();
 		pUI->m_LineAngleSlider->activate();
 		pUI->m_StrokeDirectionChoice->activate();
+		pUI->m_AnotherGradientButton->activate();
 	}
 	else {
 		pUI->m_LineWidthSlider->deactivate();
 		pUI->m_LineAngleSlider->deactivate();
 		pUI->m_StrokeDirectionChoice->deactivate();
+		pUI->m_AnotherGradientButton->deactivate();
 	}
 
 	pDoc->setBrushType(type);
@@ -466,6 +480,24 @@ void ImpressionistUI::cb_executeKernel(Fl_Widget* o, void* v) {
 	pDoc->applyKernel();
 	
 }
+
+
+void ImpressionistUI::cb_anotherGradientButton(Fl_Widget* o, void* v)
+{
+	ImpressionistUI *pUI = ((ImpressionistUI*)(o->user_data()));
+	ImpressionistDoc * pDoc = pUI->getDocument();
+	if (pDoc->m_ucGradientImage == NULL || pUI->getStrokeDirection() != GRADIENT)
+	{
+		((Fl_Button*)o)->clear();
+		return;
+	}
+
+	if (pUI->m_nAnotherGradient == true) pUI->m_nAnotherGradient = false;
+	else pUI->m_nAnotherGradient = true;
+
+}
+
+
 void ImpressionistUI::cb_edge_threshold(Fl_Widget* o, void * v) {
 	((ImpressionistUI*)(o->user_data()))->m_nEgdeThreshold = int(((Fl_Slider *)o)->value());
 
@@ -474,6 +506,7 @@ void ImpressionistUI::cb_paint_edge(Fl_Widget* o, void * v) {
 	ImpressionistDoc * pDoc = ((ImpressionistUI*)(o->user_data()))->getDocument();
 	pDoc->drawEdge();
 };
+
 //------------------------------
 //some new functions wothout implementation 
 //TODO:
@@ -589,7 +622,7 @@ void ImpressionistUI::setLineAngle(int angle)
 {
 	m_nLineAngle = angle;
 
-	if (m_StrokeDirection == SLIDER)
+	if (m_StrokeDirection == SLIDER&&(m_nCurrentBrush==BRUSH_LINES||m_nCurrentBrush==BRUSH_SCATTERED_LINES))
 		if (angle <= 359)
 			m_LineAngleSlider->value(m_nLineAngle);
 }
@@ -665,6 +698,19 @@ void ImpressionistUI::setRandomSize(bool isRandom)
 	m_RandomSizeButton->value(m_nRandomSize);
 }
 
+//for another gradient
+bool ImpressionistUI::getAnotherGradient()
+{
+	return m_nAnotherGradient;
+}
+
+void ImpressionistUI::setAnotherGradient(bool gradient)
+{
+	m_nAnotherGradient = gradient;
+
+	m_AnotherGradientButton->value(m_nAnotherGradient);
+}
+
 
 // Main menu definition
 Fl_Menu_Item ImpressionistUI::menuitems[] = {
@@ -679,6 +725,7 @@ Fl_Menu_Item ImpressionistUI::menuitems[] = {
 
 		{ "Set Mural Image",	FL_ALT + 'm', (Fl_Callback *)ImpressionistUI::cb_set_mural_image },
 		{ "Load Edge Image...",	FL_ALT + 'e', (Fl_Callback *)ImpressionistUI::cb_load_edge_image },
+		{ "Load Gradient Image...", FL_ALT+'g', (Fl_Callback *)ImpressionistUI::cb_load_gradient_image},
 		{ "Load Another Image...",	FL_ALT + 'a', (Fl_Callback *)ImpressionistUI::cb_load_another_image, 0, FL_MENU_DIVIDER },
 
 
@@ -720,7 +767,9 @@ Fl_Menu_Item ImpressionistUI::brushTypeMenu[NUM_BRUSH_TYPE+1] = {
   {"Blur",				FL_ALT+'b', (Fl_Callback *)ImpressionistUI::cb_brushChoice, (void *)BRUSH_BLUR },
   { "Sharpenning",		FL_ALT + 's', (Fl_Callback *)ImpressionistUI::cb_brushChoice, (void *)BRUSH_SHARPENING },
   { "Warp",		FL_ALT + 'w', (Fl_Callback *)ImpressionistUI::cb_brushChoice, (void *)BRUSH_WARP },
+
   { "Eraser",		FL_ALT + 'e', (Fl_Callback *)ImpressionistUI::cb_brushChoice, (void *)BRUSH_ERASER },
+
 
 
   {0}
@@ -784,7 +833,13 @@ ImpressionistUI::ImpressionistUI() {
 	m_KernelInputDialog = NULL;
 	m_Normalized = NULL;
 	m_Applykernel = NULL;
+
+	m_nAnotherGradient = false;
+	m_nCurrentBrush = BRUSH_POINTS;
+
+
 	m_nEgdeThreshold = 50;
+
 	// brush dialog definition
 	m_brushDialog = new Fl_Window(400, 325, "Brush Dialog");
 		// Add a brush type choice to the dialog
@@ -881,6 +936,14 @@ ImpressionistUI::ImpressionistUI() {
 		m_AutoDrawButton = new Fl_Button(310, 200, 50, 20, "&Paint");
 		m_AutoDrawButton->user_data((void*)(this));   // record self to be used by static callback functions
 		m_AutoDrawButton->callback(cb_autoDrawButton);
+
+		
+		//add a light button for another gradient
+		m_AnotherGradientButton = new Fl_Light_Button(10, 260, 100, 20, "Another Gra.");
+		m_AnotherGradientButton->user_data((void*)(this));
+		m_AnotherGradientButton->callback(cb_anotherGradientButton);
+		m_AnotherGradientButton->deactivate();
+
 
 		////add a slider for edge threshold
 		m_ThresholdSlider = new Fl_Value_Slider(10, 230, 200, 20, "Threshold");

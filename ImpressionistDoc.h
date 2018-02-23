@@ -36,7 +36,13 @@ public:
 	int		setMuralImage(char* iname);		//the function for New Mural Image
 	int		autoDraw();						//Auto draw
 	int		applyKernel();					//apply kernel on the current paintview
+
+
+	int		loadGradientImage(char* iname);	//load gradient image
+	bool    getAnotherGradient();           //get Another gradient
+
 	void	drawEdge();						//draw the edges
+
 // Attributes
 public:
 	// Dimensions of original window.
@@ -54,6 +60,8 @@ public:
 	unsigned char* m_ucPaintingWithDim;
 
 
+	//Bitmap for gradient image
+	unsigned char* m_ucGradientImage;
 	// The current active brush.
 	ImpBrush*			m_pCurrentBrush;	
 	// Size of the brush.
@@ -74,6 +82,10 @@ public:
 	int getGx(const Point p);
 	int getGy(const Point p);
 
+	//Helper function for another gradient
+	GLubyte* GetGradientPixel(int x, int y);
+	int getAnotherGx(const Point p);
+	int getAnotherGy(const Point p);
 
 private:
 	char			m_imageName[256];

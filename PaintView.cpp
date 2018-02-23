@@ -410,7 +410,9 @@ void PaintView::autoDraw()
 	
 	//calculate how many points there are 
 	int xTimes = width / spacing;
-	int yTimes = height / spacing;
+
+	int yTimes = height / spacing+1;
+
 
 	for (int i = 0; i < xTimes*yTimes; i++)
 		index.push_back(i);

@@ -48,6 +48,9 @@ public:
 	Fl_Slider*			m_LineAngleSlider;
 	Fl_Slider*			m_AlphaSlider;
 	Fl_Choice*          m_StrokeDirectionChoice;    //new choice
+
+	Fl_Light_Button*    m_AnotherGradientButton;    //for gradient image
+
 	//for color selection dialog
 	Fl_Window*			m_colorSelectionDialog;
 	Fl_Color_Chooser*   m_colorChooser;
@@ -57,9 +60,11 @@ public:
 	Fl_Slider*			m_AutoDrawSpaceSlider;	//for auto draw
 	Fl_Light_Button*	m_RandomSizeButton;
 	Fl_Button*			m_AutoDrawButton;
+
 	//for edge draw
 	Fl_Slider*			m_ThresholdSlider;
 	Fl_Button*			m_EdgeButton;
+
 	//the setting of kernel dialog
 	Fl_Window*			m_KernelSettingDialog;
 	Fl_Int_Input*		m_NumOfRowsInput;
@@ -74,7 +79,7 @@ public:
 	int		m_nKernelWidth;
 	int		m_nKernelHeight;
 	bool	m_nNormalized;
-	
+
 	// Member functions
 	void				setDocument(ImpressionistDoc* doc);
 	ImpressionistDoc*	getDocument();
@@ -87,7 +92,9 @@ public:
 	int					getSize();
 	void				setSize(int size);
 
+
 	int					m_nEgdeThreshold;
+
 	
 	//for auto draw
 	int					getAutoDrawSpace();
@@ -118,6 +125,12 @@ public:
 
 	float				m_nAlphaOfBackground;// i am too lazy to build a get function, so i make it public
 	bool				m_nInDim;//indicate whether is in dim background mode
+
+
+								 //for gradient image
+	bool                getAnotherGradient();
+	void                setAnotherGradient(bool gradient);
+
 private:
 	ImpressionistDoc*	m_pDoc;		// pointer to document to communicate with the document
 
@@ -130,6 +143,8 @@ private:
 	int     m_StrokeDirection;  //type of direction
 	int		m_nAutoDrawSpace;	//Auto draw space
 	bool	m_nRandomSize;
+	bool    m_nAnotherGradient; //check if use another gradient
+	int		m_nCurrentBrush;
 
 	// Static class members
 	static Fl_Menu_Item		menuitems[];
@@ -150,12 +165,14 @@ private:
 	static void	cb_about(Fl_Menu_* o, void* v);
 	static void	cb_brushChoice(Fl_Widget* o, void* v);
 	static void	cb_clear_canvas_button(Fl_Widget* o, void* v);
+	static void cb_load_gradient_image(Fl_Menu_* o, void* v);	//new bonus: load a gradient image
 
 	static void	cb_sizeSlides(Fl_Widget* o, void* v);
 	static void cb_lineWidthSlides(Fl_Widget * o, void * v);
 	static void cb_lineAngleSlides(Fl_Widget * o, void * v);
 	static void cb_alphaSlides(Fl_Widget * o, void * v);
 	static void cb_strokeDirectionChoice(Fl_Widget* o, void* v);//new callback for new choice
+	static void cb_anotherGradientButton(Fl_Widget* o, void* v);//for another gradient
 
 	static void cb_autoDrawSpaceSlides(Fl_Widget* o, void* v);	//Callback functions for auto draw
 	static void cb_randomSizeButton(Fl_Widget* o, void* v);
@@ -182,9 +199,11 @@ private:
 	static void cb_kernel_apply(Fl_Widget* o, void* v);
 	static void cb_normalize_button(Fl_Widget* o, void* v);
 	static void cb_executeKernel(Fl_Widget* o, void* v);
+
 	//edge detector
 	static void cb_edge_threshold(Fl_Widget* o, void * v);
 	static void cb_paint_edge(Fl_Widget* o, void * v);
+
 };
 
 #endif
