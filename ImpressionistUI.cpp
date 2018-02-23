@@ -403,6 +403,70 @@ void ImpressionistUI::cb_dimsliders(Fl_Widget* o, void* v) {
 	((ImpressionistUI*)(o->user_data()))->m_paintView->refresh();
 
 }
+
+void ImpressionistUI::cb_kernel_setting(Fl_Menu_* o, void* v) {
+	whoami(o)->m_KernelSettingDialog->show();
+}
+void ImpressionistUI::cb_kernel_apply(Fl_Widget* o, void* v) {
+	ImpressionistUI *pUI = ((ImpressionistUI*)(o->user_data()));
+	pUI->m_nKernelWidth = atoi( pUI->m_NumOfColsInput->value());
+	pUI->m_nKernelHeight = atoi(pUI->m_NumOfRowsInput->value());
+	pUI->m_KernelSettingDialog->hide();
+
+	//if the input is illegal, stop
+	if (pUI->m_nKernelWidth % 2 == 0 || pUI->m_nKernelHeight % 2 == 0) {
+		fl_alert("we need two odd numbers");
+		return;
+	}
+
+	//after getting the basic dimension,we need to calcalate the width and height of the window
+	int WindowWidth = pUI->m_nKernelWidth * 50;
+	int WindowHeight = pUI->m_nKernelHeight * 50;
+	//clear the vector
+	if (!pUI->m_MatrixInput.empty()) {
+		vector<Fl_Float_Input*>::iterator p =   pUI->m_MatrixInput.begin();
+		while (p != pUI->m_MatrixInput.end()) {
+			p = pUI->m_MatrixInput.erase(p);
+		}
+		pUI->m_MatrixInput.clear();
+	}
+	//set up for the input window
+	if (pUI->m_KernelInputDialog) delete pUI->m_KernelInputDialog;
+	if (pUI->m_Normalized)delete pUI->m_Normalized;
+	if (pUI->m_Applykernel)delete pUI->m_Applykernel;
+	pUI->m_KernelInputDialog = new Fl_Window(WindowWidth, WindowHeight, "Please input the kernel");
+	//set up the input of kernel
+
+	for (int i = 0; i < pUI->m_nKernelHeight * pUI->m_nKernelWidth; ++i) {
+		Fl_Float_Input* input = new Fl_Float_Input(5 + (i%pUI->m_nKernelWidth) * 40, 5 + (i / pUI->m_nKernelWidth) * 30, 20, 20, "");
+		input->value("0");
+		pUI->m_MatrixInput.push_back(input);
+	}
+	
+	pUI->m_Normalized = new Fl_Light_Button(20, WindowHeight - 30, 100, 25, "&Normalize");
+	pUI->m_Normalized->user_data((void*)(pUI));
+	pUI->m_Normalized->callback(cb_normalize_button);
+	pUI->m_Normalized->value(pUI->m_nNormalized);
+	
+	pUI->m_Applykernel = new Fl_Button(WindowWidth - 100, WindowHeight - 50, 60, 30, "&Apply");
+	pUI->m_Applykernel->user_data((void*)(pUI));
+	pUI->m_Applykernel->callback(cb_executeKernel);
+
+
+
+	pUI->m_KernelInputDialog->end();
+	pUI->m_KernelInputDialog->show();
+};
+void ImpressionistUI::cb_normalize_button(Fl_Widget* o, void* v) {
+	((ImpressionistUI*)(o->user_data()))->m_nNormalized = !((ImpressionistUI*)(o->user_data()))->m_nNormalized;
+}
+
+void ImpressionistUI::cb_executeKernel(Fl_Widget* o, void* v) {
+	ImpressionistDoc * pDoc = ((ImpressionistUI*)(o->user_data()))->getDocument();
+	pDoc->applyKernel();
+	
+}
+
 //------------------------------
 //some new functions wothout implementation 
 //TODO:
@@ -614,6 +678,8 @@ Fl_Menu_Item ImpressionistUI::menuitems[] = {
 		{ "&Quit",			FL_ALT + 'q', (Fl_Callback *)ImpressionistUI::cb_exit },
 		{ 0 },
 	{ "&Display",		0, 0, 0, FL_SUBMENU },
+		{ "&Kelnel setting",			FL_ALT + 'k', (Fl_Callback *)ImpressionistUI::cb_kernel_setting},
+
 		{ "&Dim Background",			FL_ALT + 'b', (Fl_Callback *)ImpressionistUI::cb_dim },
 
 		{ "&Undo",			FL_ALT + 'd', (Fl_Callback *)ImpressionistUI::cb_undo_painting },
@@ -706,6 +772,10 @@ ImpressionistUI::ImpressionistUI() {
 	m_nRandomSize = true;
 	m_nAlphaOfBackground = 0.0;
 	m_nInDim = FALSE;
+	m_nNormalized = FALSE;
+	m_KernelInputDialog = NULL;
+	m_Normalized = NULL;
+	m_Applykernel = NULL;
 	// brush dialog definition
 	m_brushDialog = new Fl_Window(400, 325, "Brush Dialog");
 		// Add a brush type choice to the dialog
@@ -831,4 +901,24 @@ ImpressionistUI::ImpressionistUI() {
 
 
 	m_DimDialog->end();
+
+	m_KernelSettingDialog = new Fl_Window(250, 100, "Kernel Setting Dialog");
+		m_NumOfRowsInput = new Fl_Int_Input(60, 10, 40, 20, "Height:");
+		m_NumOfRowsInput->labelfont(FL_COURIER);
+		m_NumOfRowsInput->labelsize(12);
+		m_NumOfRowsInput->value("3");
+
+		m_NumOfColsInput = new Fl_Int_Input(160, 10, 40, 20, "Width:");
+		m_NumOfColsInput->labelfont(FL_COURIER);
+		m_NumOfColsInput->labelsize(12);
+		m_NumOfColsInput->value("3");
+		
+		m_ConfirmButton = new Fl_Button(130, 40, 70, 20, "&Apply");
+		m_ConfirmButton->user_data((void*)(this));
+		m_ConfirmButton->callback(cb_kernel_apply);
+
+
+
+
+	m_KernelSettingDialog->end();
 }

@@ -22,6 +22,8 @@
 #include "BlurBrush.h"
 #include "SharpeningBrush.h"
 #include "WarpBrush.h"
+#include <iostream>
+using namespace std;
 #define DESTROY(p)	{  if ((p)!=NULL) {delete [] p; p=NULL; } }
 
 GLubyte* BLACKCOLOR = new GLubyte[3] ;
@@ -322,6 +324,64 @@ int	ImpressionistDoc::autoDraw()
 	
 	return 0;
 }
+int	ImpressionistDoc::applyKernel() 
+{
+	GLubyte color[3];
+	//first we need to calculate the big the kernel is 
+	int xR = m_pUI->m_nKernelWidth/2;
+	int yR = m_pUI->m_nKernelHeight/2;
+	//cout <<"sss" <<yR << endl;
+	for (int i = 0; i < m_nPaintHeight * m_nPaintWidth; ++i) {
+		//check whether this point is valid
+		Point target(i%m_nPaintWidth, i / m_nPaintWidth);
+		if (target.x + xR < m_nPaintWidth && target.x - xR > 0 && target.y + yR < m_nPaintHeight && target.y - yR > 0) {
+			//it is valid, now apply the kernel
+			int new_color_result[3] = { 0 };
+			for (int j = -xR; j < xR + 1; ++j) {
+				for (int k = -yR; k < yR + 1; ++k) {
+					int position = (xR + j) + (yR + k) * m_pUI->m_nKernelWidth;
+					
+						
+					memcpy(color,GetOriginalPixel(target.x + j, target.y - k), 3);
+					//if (i < 1000)
+						//cout << int(color[0]) << "ss " << int(color[1]) << "ss" << int(color[2]) << "ss" << atoi(m_pUI->m_MatrixInput[position]->value())<<endl;
+					new_color_result[0] += color[0] * atoi(m_pUI->m_MatrixInput[position]->value());
+					new_color_result[1] += color[1] * atoi(m_pUI->m_MatrixInput[position]->value());
+					new_color_result[2] += color[2] * atoi(m_pUI->m_MatrixInput[position]->value());
+					//if (i < 1000)
+						//cout << new_color_result[0] << "xxx"<< new_color_result[1] << "ddd" << new_color_result[2] <<endl;
+				}
+			}
+			if (m_pUI->m_nNormalized) {
+				int add_result = 0;
+				for (int m = 0; m < m_pUI->m_nKernelWidth*m_pUI->m_nKernelHeight; m++) {
+					add_result += atoi(m_pUI->m_MatrixInput[m]->value());
+				}
+				new_color_result[0] /= add_result;
+				new_color_result[1] /= add_result;
+				new_color_result[2] /= add_result;
+			}
+			if (new_color_result[0] > 255)
+				new_color_result[0] = 255;
+			if (new_color_result[1] > 255)
+				new_color_result[1] = 255;
+			if (new_color_result[2] > 255)
+				new_color_result[2] = 255;
+			m_ucPainting[3*i] = new_color_result[0];
+			m_ucPainting[3*i+1] = new_color_result[1];
+			m_ucPainting[3*i+2] = new_color_result[2];
+
+		}
+	}
+	cout << "dd" << endl;
+	m_pUI->m_paintView->refresh();
+	return 1;
+}
+
+
+
+
+
 
 //------------------------------------------------------------------
 // Get the color of the pixel in the original image at coord x and y
@@ -351,7 +411,7 @@ GLubyte* ImpressionistDoc::GetOriginalPixel( const Point p )
 
 //get the color of the pixel in the image, if it is out of the image, set it to black
 GLubyte* ImpressionistDoc::GetOriginalPixelBlack(const Point p) {
-	if (p.x < m_nWidth || p.y < m_nHeight || p.x > 0 || p.y > 0)
+	if (p.x < m_nWidth && p.y < m_nHeight && p.x > 0 && p.y > 0)
 		return (GLubyte*)(m_ucPainting + 3 * (p.y*m_nWidth + p.x));
 	else
 	{
@@ -376,7 +436,7 @@ int ImpressionistDoc::getGx(const Point p)
 
 int ImpressionistDoc::getGy(const Point p)
 {
-	return (*(GetOriginalPixel(p.x + 1, p.y - 1)) - *(GetOriginalPixel(p.x + 1, p.y + 1))) +
-		(*(GetOriginalPixel(p.x - 1, p.y - 1)) - *(GetOriginalPixel(p.x - 1, p.y + 1))) +
-		2 * (*(GetOriginalPixel(p.x, p.y - 1)) - *(GetOriginalPixel(p.x, p.y + 1)));
+	return (*(GetOriginalPixel(p.x + 1, p.y + 1)) - *(GetOriginalPixel(p.x + 1, p.y - 1))) +
+		(*(GetOriginalPixel(p.x - 1, p.y + 1)) - *(GetOriginalPixel(p.x - 1, p.y - 1))) +
+		2 * (*(GetOriginalPixel(p.x, p.y + 1)) - *(GetOriginalPixel(p.x, p.y - 1)));
 }

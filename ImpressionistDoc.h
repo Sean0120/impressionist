@@ -35,7 +35,7 @@ public:
 	int     getStrokeDirection();           //get the stroke direction
 	int		setMuralImage(char* iname);		//the function for New Mural Image
 	int		autoDraw();						//Auto draw
-
+	int		applyKernel();					//apply kernel on the current paintview
 // Attributes
 public:
 	// Dimensions of original window.

@@ -405,7 +405,7 @@ void PaintView::autoDraw()
 	//randAttr part
 	bool randAttr = m_pUI->getRandomSize();
 	int size = m_pUI->getSize();
-	int lineWidth = m_pUI->getLineAngle();
+	int lineWidth = m_pUI->getLineWidth();
 	int lineAngle = m_pUI->getLineAngle();
 	
 	//calculate how many points there are 
