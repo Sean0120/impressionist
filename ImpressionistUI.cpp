@@ -372,6 +372,28 @@ void ImpressionistUI::cb_color_selection(Fl_Widget* o, void* v) {
 	((ImpressionistUI*)(o->user_data()))->m_ncolors[1] = float(((Fl_Color_Chooser *)o)->g());
 	((ImpressionistUI*)(o->user_data()))->m_ncolors[2] = float(((Fl_Color_Chooser *)o)->b());
 };
+
+//Callback functions for auto draw
+void ImpressionistUI::cb_autoDrawSpaceSlides(Fl_Widget* o, void* v)
+{
+	((ImpressionistUI*)(o->user_data()))->m_nAutoDrawSpace = int(((Fl_Slider *)o)->value());
+}
+
+void ImpressionistUI::cb_randomSizeButton(Fl_Widget* o, void* v)
+{
+	ImpressionistUI *pUI = ((ImpressionistUI*)(o->user_data()));
+
+	if (pUI->m_nRandomSize == TRUE) pUI->m_nRandomSize = FALSE;
+	else pUI->m_nRandomSize = TRUE;
+}
+
+void ImpressionistUI::cb_autoDrawButton(Fl_Widget* o, void* v)
+{
+	ImpressionistDoc * pDoc = ((ImpressionistUI*)(o->user_data()))->getDocument();
+
+	pDoc->autoDraw();
+}
+
 //for the dim background
 void ImpressionistUI::cb_dim(Fl_Menu_* o, void* v) {
 	whoami(o)->m_DimDialog->show();
@@ -457,7 +479,7 @@ void ImpressionistUI::setSize( int size )
 {
 	m_nSize=size;
 
-	if (size<=40) 
+	if (size<=40&&m_paintView->isAutoDraw==false) //!!!!!!!Remeber to check/delete this if there is a bug
 		m_BrushSizeSlider->value(m_nSize);
 }
 //------------------------------------------------
@@ -545,6 +567,34 @@ void  ImpressionistUI::setColor(float r, float g, float b) {
 	m_ncolors[1] = g;
 	m_ncolors[2] = b;
 }
+
+//for auto draw
+int ImpressionistUI::getAutoDrawSpace()
+{
+	return m_nAutoDrawSpace;
+}
+
+void ImpressionistUI::setAutoDrawSpace(int space)
+{
+	m_nAutoDrawSpace = space;
+
+	if (space <= 16)
+		m_AutoDrawSpaceSlider->value(m_nAutoDrawSpace);
+}
+
+bool ImpressionistUI::getRandomSize()
+{
+	return m_nRandomSize;
+}
+
+void ImpressionistUI::setRandomSize(bool isRandom)
+{
+	m_nRandomSize = isRandom;
+
+	m_RandomSizeButton->value(m_nRandomSize);
+}
+
+
 // Main menu definition
 Fl_Menu_Item ImpressionistUI::menuitems[] = {
 	{ "&File",		0, 0, 0, FL_SUBMENU },
@@ -652,6 +702,8 @@ ImpressionistUI::ImpressionistUI() {
 	m_ncolors[1] = 1.0;
 	m_ncolors[2] = 1.0;
 	m_StrokeDirection = SLIDER;
+	m_nAutoDrawSpace = 1;
+	m_nRandomSize = true;
 	m_nAlphaOfBackground = 0.0;
 	m_nInDim = FALSE;
 	// brush dialog definition
@@ -726,6 +778,31 @@ ImpressionistUI::ImpressionistUI() {
 		m_AlphaSlider->value(m_nAlpha);
 		m_AlphaSlider->align(FL_ALIGN_RIGHT);
 		m_AlphaSlider->callback(cb_alphaSlides);
+
+		//add one slider for auto draw space
+		m_AlphaSlider = new Fl_Value_Slider(10, 200, 140, 20, "Spacing");
+		m_AlphaSlider->user_data((void*)(this));
+		m_AlphaSlider->type(FL_HOR_NICE_SLIDER);
+		m_AlphaSlider->labelfont(FL_COURIER);
+		m_AlphaSlider->labelsize(12);
+		m_AlphaSlider->minimum(1);
+		m_AlphaSlider->maximum(16);
+		m_AlphaSlider->step(1);
+		m_AlphaSlider->value(m_nAutoDrawSpace);
+		m_AlphaSlider->align(FL_ALIGN_RIGHT);
+		m_AlphaSlider->callback(cb_autoDrawSpaceSlides);
+
+		//add a lighting button for random size
+		m_RandomSizeButton = new Fl_Light_Button(210, 200, 90, 20, "&Size Rand.");
+		m_RandomSizeButton->user_data((void*)(this));   // record self to be used by static callback functions
+		m_RandomSizeButton->callback(cb_randomSizeButton);
+		m_RandomSizeButton->set();
+
+		//add a button to auto draw
+		m_AutoDrawButton = new Fl_Button(310, 200, 50, 20, "&Paint");
+		m_AutoDrawButton->user_data((void*)(this));   // record self to be used by static callback functions
+		m_AutoDrawButton->callback(cb_autoDrawButton);
+		
 
     m_brushDialog->end();
 

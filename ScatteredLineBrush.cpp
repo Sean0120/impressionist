@@ -58,8 +58,8 @@ void ScatteredLineBrush::BrushMove(const Point source, const Point target)
 			int position_y = rand() % size - size / 2;
 			const Point new_source(source.x + position_x, source.y + position_y); int Gx = pDoc->getGx(source);
 			int Gy = pDoc->getGy(new_source);
-			double cosAngle = Gx / sqrt(Gx*Gx + Gy*Gy);
-			double sinAngle = Gy / sqrt(Gx*Gx + Gy*Gy);
+			double cosAngle = Gy / sqrt(Gx*Gx + Gy*Gy);
+			double sinAngle = -Gx / sqrt(Gx*Gx + Gy*Gy);
 			glBegin(GL_LINES);
 			SetColor(new_source);
 			//to rotate the line, change here, use a theta 

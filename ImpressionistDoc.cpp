@@ -161,6 +161,9 @@ int ImpressionistDoc::loadImage(char *iname)
 	m_ucPaintingWithDim = new unsigned char[width*height * 3];
 	memset(m_ucPaintingWithDim, 0, width*height * 3);
 
+	m_ucUndoPainting = new unsigned char[width*height * 3];
+	memset(m_ucUndoPainting, 0, width*height * 3);
+
 	m_pUI->m_mainWindow->resize(m_pUI->m_mainWindow->x(), 
 								m_pUI->m_mainWindow->y(), 
 								width*2, 
@@ -311,6 +314,13 @@ int ImpressionistDoc::setMuralImage(char* iname) {
 
 
 
+}
+
+int	ImpressionistDoc::autoDraw()
+{
+    m_pUI->m_paintView->allowAutoDraw();
+	
+	return 0;
 }
 
 //------------------------------------------------------------------

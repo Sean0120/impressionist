@@ -50,6 +50,12 @@ public:
 	//for dim background 
 	Fl_Window*          m_DimDialog;
 	Fl_Slider*			m_DimSlider;
+	Fl_Slider*			m_AutoDrawSpaceSlider;	//for auto draw
+	Fl_Light_Button*	m_RandomSizeButton;
+	Fl_Button*			m_AutoDrawButton;
+
+	
+
 	// Member functions
 	void				setDocument(ImpressionistDoc* doc);
 	ImpressionistDoc*	getDocument();
@@ -61,6 +67,14 @@ public:
 
 	int					getSize();
 	void				setSize(int size);
+
+	
+	//for auto draw
+	int					getAutoDrawSpace();
+	void				setAutoDrawSpace(int space);
+	bool				getRandomSize();
+	void				setRandomSize(bool isRandom);
+
 
 	//for line width 
 	int					getLineWidth();
@@ -94,9 +108,8 @@ private:
 	float   m_nAlpha;
 	float   m_ncolors[3];
 	int     m_StrokeDirection;  //type of direction
-
-
-
+	int		m_nAutoDrawSpace;	//Auto draw space
+	bool	m_nRandomSize;
 
 	// Static class members
 	static Fl_Menu_Item		menuitems[];
@@ -123,6 +136,12 @@ private:
 	static void cb_lineAngleSlides(Fl_Widget * o, void * v);
 	static void cb_alphaSlides(Fl_Widget * o, void * v);
 	static void cb_strokeDirectionChoice(Fl_Widget* o, void* v);//new callback for new choice
+
+	static void cb_autoDrawSpaceSlides(Fl_Widget* o, void* v);	//Callback functions for auto draw
+	static void cb_randomSizeButton(Fl_Widget* o, void* v);
+	static void cb_autoDrawButton(Fl_Widget* o, void* v);
+	static void cb_dim(Fl_Menu_* o, void* v);
+	static void cb_dimsliders(Fl_Widget* o, void* v);
 	//add some new helper function here for "file" in menu bar
 	// the prototype may be wrong
 	static void	cb_colors(Fl_Menu_* o, void* v);
@@ -130,8 +149,6 @@ private:
 	static void	cb_paintly(Fl_Widget* o, void* v);
 	static void	cb_load_edge_image(Fl_Widget* o, void* v);
 	//add some new helper function here for "Display" in menu bar
-	static void cb_dim(Fl_Menu_* o, void* v);
-	static void cb_dimsliders(Fl_Widget* o, void* v);
 	static void cb_undo_painting(Fl_Menu_* o, void* v);
 	static void cb_switch_view(Fl_Menu_ * o, void * v);
 	static void	cb_original__image(Fl_Widget* o, void* v);

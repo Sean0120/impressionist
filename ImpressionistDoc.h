@@ -34,6 +34,7 @@ public:
 	char*	getImageName();					// get the current image name
 	int     getStrokeDirection();           //get the stroke direction
 	int		setMuralImage(char* iname);		//the function for New Mural Image
+	int		autoDraw();						//Auto draw
 
 // Attributes
 public:

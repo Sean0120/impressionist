@@ -33,6 +33,13 @@ public:
 	ImpressionistDoc* m_pDoc;
 	ImpressionistUI *m_pUI;
 
+	
+
+    
+    void allowAutoDraw();    //for auto draw
+    bool isAutoDraw;
+    void autoDraw();
+    
 	void switchToDim();
 
 	Point rightMouseStart, rightMouseEnd;	//for right mouse use

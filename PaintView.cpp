@@ -11,6 +11,10 @@
 #include "ImpBrush.h"
 #include <iostream>
 #include <math.h>
+#include<cstdlib>
+#include<ctime>
+#include<vector>
+#include<algorithm>
 using namespace std;
 
 #define LEFT_MOUSE_DOWN		1
@@ -39,7 +43,8 @@ PaintView::PaintView(int			x,
 {
 	m_nWindowWidth = w;
 	m_nWindowHeight = h;
-
+    
+    isAutoDraw=false;//for auto draw
 }
 
 
@@ -95,7 +100,7 @@ void PaintView::draw()
 	m_nStartCol		= scrollpos.x;
 	m_nEndCol		= m_nStartCol + drawWidth;
 
-	if ( m_pDoc->m_ucPainting && !isAnEvent) 
+	if ( m_pDoc->m_ucPainting && !isAnEvent)
 	{
 		RestoreContent();
 
@@ -179,9 +184,9 @@ void PaintView::draw()
 			break;
 		case LEFT_MOUSE_UP:
 			m_pDoc->m_pCurrentBrush->BrushEnd( source, target );
-
 			SaveCurrentContent();
 			RestoreContent();
+		
 			break;
 		case RIGHT_MOUSE_DOWN:
 			if (m_pDoc->getStrokeDirection() == SLIDER) {
@@ -197,6 +202,15 @@ void PaintView::draw()
 				RestoreContent();
 
 				rightMouseEnd = target;
+
+				glBegin(GL_LINES);
+
+				glColor3f(1, 0, 0);
+				glVertex2d(rightMouseStart.x, rightMouseStart.y);
+				glVertex2d(rightMouseEnd.x, rightMouseEnd.y);
+				glEnd();
+			}   //draw a red line from rightMouseStart to rightMouseEnd and set the line angle in UI
+
 
 				glBegin(GL_LINES);
 
@@ -246,6 +260,16 @@ void PaintView::draw()
 			break;
 		}
 	}
+    
+    //Check if allow auto draw
+    if(isAutoDraw==true)
+    {
+        //SaveUndoPainting();
+        autoDraw();
+		
+		isAutoDraw = false;
+		
+    }
 	if (m_pUI->m_nAlphaOfBackground != 0) {
 		switchToDim();
 		glDrawBuffer(GL_BACK);
@@ -255,6 +279,7 @@ void PaintView::draw()
 		glDrawPixels(drawWidth, drawHeight, GL_RGB, GL_UNSIGNED_BYTE, m_pDimBitstart);
 	}
 	glFlush();
+
 
 	#ifndef MESA
 	// To avoid flicker on some machines.
@@ -381,15 +406,110 @@ void PaintView::SaveUndoPainting() {
 	
 }
 
+//for auto draw
+void PaintView::allowAutoDraw()
+{
+    isAutoDraw=true;
+	redraw();
+}
+
+
+void PaintView::autoDraw()
+{
+	
+	
+	srand(time(NULL));
+	vector<int> index;
+	int spacing = m_pUI->getAutoDrawSpace();
+	int height = m_pDoc->m_nHeight;
+	int width = m_pDoc->m_nWidth;
+
+	ImpBrush* currentBrush = m_pDoc->m_pCurrentBrush;
+
+	//randAttr part
+	bool randAttr = m_pUI->getRandomSize();
+	int size = m_pUI->getSize();
+	int lineWidth = m_pUI->getLineAngle();
+	int lineAngle = m_pUI->getLineAngle();
+	
+	//calculate how many points there are 
+	int xTimes = width / spacing;
+	int yTimes = height / spacing;
+
+	for (int i = 0; i < xTimes*yTimes; i++)
+		index.push_back(i);
+	random_shuffle(index.begin(), index.end());
+	//the start y is not zero
+	int offset = m_nWindowHeight - m_nDrawHeight;
+	int startX = spacing / 2;
+	int startY = spacing / 2 + offset;
+	//start point is the left down corner
+
+	for (int i = 0; i < index.size(); i++) {
+		int position = index.at(i);
+		int x = startX + (position % xTimes)*spacing;
+		int y = startY + (position / xTimes)*spacing;
+		Point target(x, y);
+		if (randAttr) {
+			m_pUI->setSize(size + rand() % 10 - 5);
+			m_pUI->setLineAngle(lineAngle + rand() % 90 - 45);
+			m_pUI->setLineWidth(lineWidth + rand() % 10 - 5);
+		}
+		currentBrush->BrushBegin(target, target);
+		currentBrush->BrushEnd(target, target);
+		
+	}
+	
+	//set back to origin
+	m_pUI->setSize(size);
+	m_pUI->setLineAngle(lineAngle);
+	m_pUI->setLineWidth(lineWidth);
+	//save the current content
+	glPixelStorei(GL_PACK_ALIGNMENT, 1);
+	glPixelStorei(GL_PACK_ROW_LENGTH, m_pDoc->m_nPaintWidth);
+
+	glReadPixels(0,
+		m_nWindowHeight - m_nDrawHeight,
+		m_nDrawWidth,
+		m_nDrawHeight,
+		GL_RGB,
+		GL_UNSIGNED_BYTE,
+		m_pPaintBitstart);
+
+
+	/*
+    bool randomSize=m_pUI->getRandomSize();
+    int space=m_pUI->getAutoDrawSpace();
+    int ori_Size=m_pUI->getSize();
+    srand((unsigned)time(NULL));
+    for(int i=0;i<m_nDrawWidth/space+1;i++)
+    {
+        for(int j=0;j<m_nDrawHeight/space+1;j++)
+        {
+            Point current_Source(space*i+m_nStartCol, space*j-m_nWindowHeight+m_nStartRow);
+            Point current_Target(space*i, space*j);
+            if(randomSize==true)
+            {
+                m_pUI->setSize(rand()%(ori_Size)+1);
+            }
+            m_pDoc->m_pCurrentBrush->BrushBegin( current_Source, current_Target );
+        }
+    }
+	
+	
+    m_pUI->setSize(ori_Size);
+	
+	*/
+}
 //To calculate the dim version
 void PaintView::switchToDim() {
-	
+
 	float Alpha = m_pUI->m_nAlphaOfBackground;
 	for (int i = 0; i < m_pDoc->m_nHeight *m_pDoc->m_nWidth * 3; ++i) {
 		if (m_pDoc->m_ucPainting[i] == 0) {
 			m_pDoc->m_ucPaintingWithDim[i] = Alpha * m_pDoc->m_ucBitmap[i];
 
-			
+
 		}
 		else
 		{
@@ -398,10 +518,17 @@ void PaintView::switchToDim() {
 	}
 	/*
 	if (m_pUI->m_nInDim) {
-		unsigned char* temp = m_pDoc->m_ucPaintingWithDim;
-		m_pDoc->m_ucPaintingWithDim = m_pDoc->m_ucPainting;
-		m_pDoc->m_ucPainting = temp;
+	unsigned char* temp = m_pDoc->m_ucPaintingWithDim;
+	m_pDoc->m_ucPaintingWithDim = m_pDoc->m_ucPainting;
+	m_pDoc->m_ucPainting = temp;
 	}
 	m_pUI->m_paintView->refresh();
 	*/
 }
+
+
+
+
+
+
+
